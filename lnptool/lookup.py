@@ -2,20 +2,18 @@
 查询业务逻辑模块 - 处理电话号码查询的核心逻辑
 """
 
-import os
 import time
 import logging
-from typing import Dict, Any, List, Optional, Tuple, Union
-import csv
-import json
+from typing import Dict, Any, List, Optional
 from pathlib import Path
 
 import pandas as pd
 from rich.console import Console
 from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+from rich import box
 
-from lnptool.telnyx_api import TelnyxAPI, LookupResult
+from lnptool.telnyx_api import TelnyxAPI, LookupResult, CarrierInfo, PortabilityInfo
 from lnptool.cache import Cache
 from lnptool.config import get_api_key, is_configured
 
@@ -73,14 +71,43 @@ class LookupService:
         
         if not cache_hit:
             # 通过API查询
-            with console.status(f"查询号码 {formatted_number} 中...", spinner="dots"):
-                result = self.api.lookup_number(formatted_number)
-                
-                # 缓存结果（如果查询成功）
-                if result.status == "success" and self.use_cache and self.cache:
-                    self.cache.set(formatted_number, result.dict())
-                
-                return result
+            try:
+                with console.status(f"查询号码 {formatted_number} 中...", spinner="dots"):
+                    result = self.api.lookup_number(formatted_number)
+                    
+                    # 检查是否是错误结果
+                    if result.status.startswith("error:"):
+                        logger.warning(f"API lookup failed: {result.status}")
+                        return result
+                    
+                    # 缓存结果（如果查询成功）
+                    if self.use_cache and self.cache:
+                        self.cache.set(formatted_number, result.dict())
+                    
+                    return result
+            except Exception as e:
+                logger.error(f"Unexpected error during lookup: {e}")
+                # 创建一个安全的错误结果对象
+                return LookupResult(
+                    phone_number=formatted_number,
+                    country_code="US",
+                    carrier=CarrierInfo(
+                        name="Error", 
+                        type="unknown", 
+                        mobile_country_code=None, 
+                        mobile_network_code=None
+                    ),
+                    portability=PortabilityInfo(
+                        portable=False,
+                        ported=False,
+                        spid=None,
+                        ocn=None,
+                        previous_carrier=None
+                    ),
+                    status=f"error: 查询过程中出现意外错误 - {str(e)}",
+                    lookup_time=time.time(),
+                    request_id=None
+                )
     
     def _sanitize_cached_data(self, data: Dict[str, Any]) -> None:
         """
@@ -192,18 +219,46 @@ class LookupService:
                     time.sleep(delay - (current_time - last_request_time))
                 
                 # 查询号码
-                result = self.lookup_number(number)
+                try:
+                    result = self.lookup_number(number)
+                except Exception as e:
+                    # 捕获所有异常并创建错误结果对象
+                    error_message = str(e)
+                    console.print(f"[bold yellow]警告：查询号码 {number} 时发生错误: {error_message}[/bold yellow]")
+                    
+                    # 创建错误结果对象
+                    result = LookupResult(
+                        phone_number=number,
+                        country_code="Unknown",
+                        carrier=CarrierInfo(
+                            name="Error",
+                            type="unknown",
+                            mobile_country_code=None,
+                            mobile_network_code=None
+                        ),
+                        portability=PortabilityInfo(
+                            portable=False,
+                            ported=False,
+                            spid=None,
+                            ocn=None,
+                            previous_carrier=None
+                        ),
+                        status=f"error: {error_message}",
+                        lookup_time=time.time(),
+                        request_id=None
+                    )
+                
                 results.append(result)
                 last_request_time = time.time()
                 
                 # 更新进度
                 progress.update(task, advance=1, description=f"正在查询 ({i+1}/{len(unique_numbers)})")
         
-        # 导出结果到CSV
+        # 如果指定了输出文件，保存结果
         if output_file:
             self.export_results_to_csv(results, output_file)
             console.print(f"[green]查询结果已保存至：[bold]{output_file}[/bold][/green]")
-        
+            
         return results
     
     def batch_lookup_from_csv(self, 
@@ -317,16 +372,49 @@ class LookupService:
 
 def display_lookup_result(result: LookupResult) -> None:
     """
-    在控制台漂亮地显示查询结果
+    显示查询结果
     
     Args:
         result: 查询结果
     """
-    # 创建一个表格
-    table = Table(title=f"电话号码: {result.phone_number}", show_header=False, box=True)
+    table = Table(title=f"电话号码 {result.phone_number} 查询结果", show_header=False, box=box.ROUNDED)
+    table.add_column("字段", style="cyan")
+    table.add_column("值")
     
-    table.add_column("属性", style="cyan")
-    table.add_column("值", style="white")
+    # 处理错误结果
+    if result.status.startswith("error:"):
+        error_message = result.status[6:].strip()
+        table.add_row("查询状态", "[bold red]失败[/bold red]")
+        
+        # 检查是否包含建议信息（由TelnyxAPI._handle_response添加）
+        if "建议：" in error_message:
+            # 分割错误信息和建议
+            parts = error_message.split("建议：")
+            error_info = parts[0].strip()
+            suggestion = parts[1].strip()
+            
+            table.add_row("错误信息", f"[red]{error_info}[/red]")
+            table.add_row("建议", f"[yellow]{suggestion}[/yellow]")
+        else:
+            # 显示错误信息
+            table.add_row("错误信息", f"[red]{error_message}[/red]")
+            
+            # 根据错误类型提供一般性建议
+            if "403" in error_message:
+                table.add_row("建议", "[yellow]请确保您的Telnyx账户状态正常，已完成KYC认证并且有足够的余额。访问Telnyx控制台检查账户状态。[/yellow]")
+            elif "401" in error_message:
+                table.add_row("建议", "[yellow]请检查您的API密钥是否正确。运行 'lnp config set-key' 重新设置API密钥。[/yellow]")
+            elif "404" in error_message:
+                table.add_row("建议", "[yellow]请检查电话号码格式是否正确，或者该号码可能不存在于Telnyx数据库中。[/yellow]")
+            elif "429" in error_message:
+                table.add_row("建议", "[yellow]请求频率过高，请降低请求速率或稍后再试。[/yellow]")
+            elif "502" in error_message or "503" in error_message:
+                table.add_row("建议", "[yellow]Telnyx服务器暂时不可用，请稍后再试。[/yellow]")
+            elif "timeout" in error_message.lower():
+                table.add_row("建议", "[yellow]请求超时，请检查网络连接或稍后再试。[/yellow]")
+        
+        console.print(table)
+        return
     
     # 添加基本信息
     table.add_row("国家", result.country_code)
@@ -349,7 +437,7 @@ def display_lookup_result(result: LookupResult) -> None:
     
     # 添加查询状态信息
     if result.status != "success":
-        table.add_row("查询状态", f"[bold red]{result.status}[/bold red]")
+        table.add_row("查询状态", f"[bold yellow]{result.status}[/bold yellow]")
     
     console.print(table)
 
@@ -376,8 +464,31 @@ def display_batch_summary(results: List[LookupResult]) -> None:
     # 计算携号转网统计
     ported_count = sum(1 for r in results if r.status == "success" and r.portability and r.portability.ported)
     
+    # 统计错误类型
+    error_types = {}
+    for result in results:
+        if result.status.startswith("error:"):
+            error_message = result.status[6:].strip()
+            # 提取错误类型
+            error_type = "其他错误"
+            
+            if "403" in error_message:
+                error_type = "账户权限问题 (403)"
+            elif "401" in error_message:
+                error_type = "API密钥无效 (401)"
+            elif "404" in error_message:
+                error_type = "号码不存在 (404)"
+            elif "429" in error_message:
+                error_type = "请求频率限制 (429)"
+            elif any(code in error_message for code in ["500", "502", "503", "504"]):
+                error_type = "服务器错误 (5xx)"
+            elif "timeout" in error_message.lower():
+                error_type = "请求超时"
+                
+            error_types[error_type] = error_types.get(error_type, 0) + 1
+    
     # 创建摘要表
-    table = Table(title="批量查询摘要", show_header=True)
+    table = Table(title="批量查询摘要", show_header=True, box=box.ROUNDED)
     
     table.add_column("统计项", style="cyan")
     table.add_column("数值", style="white")
@@ -386,13 +497,15 @@ def display_batch_summary(results: List[LookupResult]) -> None:
     table.add_row("总号码数", str(total), "100%")
     table.add_row("成功查询", str(successful), f"{successful/total*100:.1f}%" if total > 0 else "0%")
     table.add_row("查询失败", str(failed), f"{failed/total*100:.1f}%" if total > 0 else "0%")
-    table.add_row("已携号转网", str(ported_count), f"{ported_count/successful*100:.1f}%" if successful > 0 else "0%")
+    
+    if successful > 0:
+        table.add_row("已携号转网", str(ported_count), f"{ported_count/successful*100:.1f}%")
     
     console.print(table)
     
     # 显示运营商分布
     if carrier_counts:
-        carrier_table = Table(title="运营商分布", show_header=True)
+        carrier_table = Table(title="运营商分布", show_header=True, box=box.ROUNDED)
         carrier_table.add_column("运营商", style="cyan")
         carrier_table.add_column("号码数", style="white")
         carrier_table.add_column("百分比", style="green")
@@ -404,3 +517,40 @@ def display_batch_summary(results: List[LookupResult]) -> None:
             carrier_table.add_row(carrier, str(count), f"{count/successful*100:.1f}%" if successful > 0 else "0%")
         
         console.print(carrier_table)
+    
+    # 显示错误类型分布
+    if error_types:
+        error_table = Table(title="错误类型分布", show_header=True, box=box.ROUNDED)
+        error_table.add_column("错误类型", style="red")
+        error_table.add_column("数量", style="white")
+        error_table.add_column("百分比", style="yellow")
+        
+        # 按数量排序
+        sorted_errors = sorted(error_types.items(), key=lambda x: x[1], reverse=True)
+        
+        for error_type, count in sorted_errors:
+            error_table.add_row(error_type, str(count), f"{count/failed*100:.1f}%" if failed > 0 else "0%")
+        
+        console.print(error_table)
+        
+        # 提供常见错误的解决建议
+        if failed > 0:
+            console.print("\n[bold yellow]常见错误解决方案：[/bold yellow]")
+            
+            if any(e for e in error_types if "403" in e):
+                console.print("- [yellow]账户权限问题 (403)：请确保您的Telnyx账户状态正常，已完成KYC认证并且有足够的余额。访问Telnyx控制台检查账户状态。[/yellow]")
+            
+            if any(e for e in error_types if "401" in e):
+                console.print("- [yellow]API密钥无效 (401)：请检查您的API密钥是否正确。运行 'lnp config set-key' 重新设置API密钥。[/yellow]")
+            
+            if any(e for e in error_types if "404" in e):
+                console.print("- [yellow]号码不存在 (404)：请检查电话号码格式是否正确，或者该号码可能不存在于Telnyx数据库中。[/yellow]")
+            
+            if any(e for e in error_types if "429" in e):
+                console.print("- [yellow]请求频率限制 (429)：请降低请求速率，可以增加批量查询的rate_limit参数值。[/yellow]")
+            
+            if any(e for e in error_types if "5xx" in e):
+                console.print("- [yellow]服务器错误 (5xx)：Telnyx服务器暂时不可用，请稍后再试。如果问题持续存在，请检查Telnyx状态页面。[/yellow]")
+            
+            if any(e for e in error_types if "超时" in e):
+                console.print("- [yellow]请求超时：请检查您的网络连接，或者Telnyx服务可能响应缓慢，稍后再试。[/yellow]")
