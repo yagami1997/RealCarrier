@@ -76,3 +76,11 @@ project_management/reports/weekly/*
 *private*
 *confidential*
 *secret*
+
+# 忽略开发指南和个人文档
+Dev_Guide.md
+personal_notes.md
+my_progress.md
+daily_notes.md
+weekly_summary.md
+memo.md
