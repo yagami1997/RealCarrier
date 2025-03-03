@@ -57,8 +57,11 @@ cd realcarrier
 # 创建虚拟环境
 python -m venv venv
 
-# 激活虚拟环境
-venv\Scripts\activate
+# 激活虚拟环境（在命令提示符CMD中）
+venv\Scripts\activate.bat
+
+# 激活虚拟环境（在PowerShell中）
+.\venv\Scripts\Activate.ps1
 
 # 安装依赖
 pip install -r requirements.txt
