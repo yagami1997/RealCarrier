@@ -35,8 +35,8 @@ RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号
 git clone https://github.com/yourusername/realcarrier.git
 cd realcarrier
 
-# 安装
-pip install -e .
+# 安装依赖
+pip install -r requirements.txt
 ```
 
 ---
@@ -80,14 +80,14 @@ lnp cache info
 ### 命令行输出
 
 ```
-┌───────────────────────────┐
-│ 电话号码: +14155552671     │
-├───────────────────────────┤
-│ 运营商: T-Mobile USA, Inc. │
-│ 号码类型: mobile           │
-│ 携号转网: 是               │
-│ 原运营商: AT&T Mobility    │
-└───────────────────────────┘
+┌─────────────────────────────┐
+│ 电话号码: +14155552671      │
+├─────────────────────────────┤
+│ 运营商: T-Mobile USA, Inc.  │
+│ 号码类型: mobile            │
+│ 携号转网: 是                │
+│ 原运营商: AT&T Mobility     │
+└─────────────────────────────┘
 ```
 
 ### CSV输出示例
@@ -113,8 +113,8 @@ source venv/bin/activate
 # 激活环境 (Windows)
 venv\Scripts\activate
 
-# 安装开发依赖
-pip install -e ".[dev]"
+# 安装依赖
+pip install -r requirements.txt
 ```
 
 ### 运行测试
