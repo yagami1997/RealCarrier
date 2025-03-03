@@ -46,19 +46,23 @@ def show_logo():
 
 def show_main_menu():
     """显示主菜单"""
-    table = Table(show_header=False, box=box.ROUNDED, border_style="blue")
-    table.add_column("选项", style="cyan", justify="center")
-    table.add_column("描述", style="white")
+    console.print("\n[bold cyan]RealCarrier Alpha[/bold cyan] - 美国电话号码查询工具\n")
     
-    table.add_row("[1]", "API密钥配置")
-    table.add_row("[2]", "查询单个电话号码")
-    table.add_row("[3]", "批量查询CSV文件")
-    table.add_row("[4]", "缓存管理")
-    table.add_row("[5]", "系统信息")
-    table.add_row("[0]", "退出程序")
+    # 创建带有表情符号的菜单表格
+    table = Table(show_header=False, box=box.ROUNDED)
+    table.add_column("选项", style="cyan")
+    table.add_column("功能描述", style="white")
+    
+    # 为每个选项添加表情符号
+    table.add_row("[1]", "🔑 API密钥配置")
+    table.add_row("[2]", "📱 查询单个电话号码")
+    table.add_row("[3]", "📊 批量查询CSV文件")
+    table.add_row("[4]", "💾 缓存管理")
+    table.add_row("[5]", "ℹ️ 系统信息")
+    table.add_row("[0]", "❌ 退出程序")
     
     console.print(table)
-    console.print()
+    console.print("请选择功能 [0-5]: ", end="")
 
 def check_api_key_status():
     """检查API密钥状态"""
