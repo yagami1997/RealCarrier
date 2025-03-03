@@ -87,13 +87,13 @@ class TelnyxAPI:
     
     def _handle_response(self, response: requests.Response) -> Dict[str, Any]:
         """
-        处理API响应
+        处理API响应并提取数据
         
         Args:
-            response: Requests响应对象
+            response: API响应对象
             
         Returns:
-            Dict[str, Any]: 解析后的响应JSON
+            Dict[str, Any]: 响应数据
             
         Raises:
             APIError: 如果响应包含错误
@@ -102,18 +102,38 @@ class TelnyxAPI:
             response.raise_for_status()
             return response.json()
         except requests.HTTPError as e:
+            status_code = response.status_code
             error_msg = f"HTTP Error: {e}"
+            user_suggestion = ""
+            
+            # 根据状态码提供不同的建议
+            if status_code == 403:
+                user_suggestion = "请确保您的Telnyx账户状态正常，已完成KYC认证并且有足够的余额。访问Telnyx控制台检查账户状态。"
+            elif status_code == 401:
+                user_suggestion = "认证失败，请检查API密钥是否正确，或者运行 'lnp config set-key' 重新配置API密钥。"
+            elif status_code == 404:
+                user_suggestion = "请求的资源不存在，请检查电话号码格式是否正确或该号码可能不在Telnyx数据库中。"
+            elif status_code == 429:
+                user_suggestion = "请求频率超限，请稍后再试或降低请求频率。批量查询时可以增加delay参数的值。"
+            elif status_code >= 500:
+                user_suggestion = "Telnyx服务器暂时不可用，请稍后再试。如果问题持续存在，请检查Telnyx状态页面(https://status.telnyx.com)或联系Telnyx支持。"
+            
             try:
                 error_data = response.json()
                 if "errors" in error_data and error_data["errors"]:
-                    error_msg = f"{error_msg} - {error_data['errors'][0].get('detail', '')}"
+                    error_detail = error_data['errors'][0].get('detail', '')
+                    error_msg = f"{error_msg} - {error_detail}"
             except (ValueError, KeyError):
                 pass
             
-            logger.error(f"API request failed: {error_msg}")
+            # 添加用户建议到错误信息中
+            if user_suggestion:
+                error_msg = f"{error_msg}\n建议：{user_suggestion}"
+            
+            logger.error(f"API请求失败: {error_msg}")
             raise APIError(error_msg, response.status_code, response.text)
         except ValueError:
-            error_msg = "Invalid JSON in response"
+            error_msg = "响应中包含无效的JSON数据"
             logger.error(error_msg)
             raise APIError(error_msg, response.status_code, response.text)
     
@@ -303,11 +323,27 @@ class TelnyxAPI:
             
         except APIError as e:
             # 创建错误结果
+            error_message = str(e)
+            logger.error(f"创建错误结果: {error_message}")
+            
+            # 创建一个有效的错误结果对象
             return LookupResult(
                 phone_number=formatted_number,
                 country_code="US",
-                carrier=CarrierInfo(name="Error", type="unknown"),
-                status=f"error: {str(e)}",
+                carrier=CarrierInfo(
+                    name="Error", 
+                    type="unknown", 
+                    mobile_country_code=None, 
+                    mobile_network_code=None
+                ),
+                portability=PortabilityInfo(
+                    portable=False,
+                    ported=False,
+                    spid=None,
+                    ocn=None,
+                    previous_carrier=None
+                ),
+                status=f"error: {error_message}",
                 lookup_time=time.time(),
                 request_id=None
             )
