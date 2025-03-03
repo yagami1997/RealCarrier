@@ -40,7 +40,7 @@ RealCarrier系统采用以下技术路线解决美国电话号码查询需求：
 <p align="center">
   <img src="https://img.shields.io/badge/版本-0.1.0-blue" alt="版本">
   <img src="https://img.shields.io/badge/语言-Python-green" alt="语言">
-  <img src="https://img.shields.io/badge/许可证-MIT-yellow" alt="许可证">
+  <img src="https://img.shields.io/badge/许可证-GPL%203.0-yellow" alt="许可证">
 </p>
 
 <p align="center">
@@ -216,7 +216,9 @@ pytest
 
 ## ⚖️ 许可证
 
-[MIT](LICENSE)
+本项目基于[GNU通用公共许可证第3版(GPL 3.0)](LICENSE)发布。
+
+作为自由软件，您可以按照自由软件基金会(Free Software Foundation)发布的GNU通用公共许可证的条款，对本程序进行再分发和修改。本程序使用GPL 3.0许可证，使用GPL许可证是支持自由软件运动的重要方式，确保软件及其派生作品始终保持开放和自由。
 
 ---
 
