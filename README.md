@@ -1,7 +1,5 @@
 <h1 align="center">🌟 RealCarrier Alpha 🌟</h1>
 
----
-
 ## 基于Telnyx LNP的美国电话号码查询工具
 
 ### 📞 项目概述：美国电话号码状态查询系统
