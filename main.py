@@ -86,7 +86,7 @@ def configure_api_key():
             return
     
     # 输入新的API密钥
-    console.print("请输入您的Telnyx API密钥 (通常以KEY_开头):")
+    console.print("请输入您的Telnyx API密钥 (通常以KEY开头):")
     api_key = Prompt.ask("> ", password=False)  # 明文显示以便确认
     
     # 确认输入
@@ -94,7 +94,7 @@ def configure_api_key():
     
     # 验证格式
     if not is_valid_api_key(api_key):
-        print_warning("API密钥格式可能不正确，通常以KEY_开头。")
+        print_warning("API密钥格式可能不正确，通常以KEY开头。")
         if not Confirm.ask("是否仍要保存?"):
             print_info("操作已取消。")
             return
@@ -108,8 +108,8 @@ def configure_api_key():
             console.print("\n[bold]正在验证API密钥...[/bold]")
             try:
                 api = TelnyxAPI(api_key=api_key)
-                # 尝试一个测试请求
-                response = api._make_request("GET", "/available_phone_numbers/regulatory_requirements", params={"limit": 1})
+                # 使用正确的LNP查询端点测试API密钥
+                response = api._make_request("GET", "/number_lookup/+14155552671", params={"type": "carrier"})
                 print_success("API密钥验证成功!")
             except Exception as e:
                 print_warning(f"API密钥验证失败: {str(e)}")
