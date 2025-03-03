@@ -62,8 +62,14 @@ class LookupService:
             if cached_result:
                 logger.debug(f"Cache hit for {formatted_number}")
                 cache_hit = True
-                # 从缓存创建结果对象
-                return LookupResult.parse_obj(cached_result)
+                try:
+                    # 处理缓存数据，确保所有字段类型正确
+                    self._sanitize_cached_data(cached_result)
+                    # 从缓存创建结果对象
+                    return LookupResult.parse_obj(cached_result)
+                except Exception as e:
+                    logger.error(f"Error parsing cached result: {e}")
+                    cache_hit = False
         
         if not cache_hit:
             # 通过API查询
@@ -75,6 +81,74 @@ class LookupService:
                     self.cache.set(formatted_number, result.dict())
                 
                 return result
+    
+    def _sanitize_cached_data(self, data: Dict[str, Any]) -> None:
+        """
+        确保缓存数据中的字段类型正确，防止出现类型错误
+        
+        Args:
+            data: 要清理的缓存数据
+        """
+        # 确保基本字段类型正确
+        if "phone_number" in data and not isinstance(data["phone_number"], str):
+            data["phone_number"] = str(data["phone_number"]) if data["phone_number"] is not None else ""
+            
+        if "country_code" in data and not isinstance(data["country_code"], str):
+            data["country_code"] = str(data["country_code"]) if data["country_code"] is not None else "US"
+            
+        if "status" in data and not isinstance(data["status"], str):
+            data["status"] = str(data["status"]) if data["status"] is not None else "unknown"
+            
+        if "request_id" in data and data["request_id"] is not None and not isinstance(data["request_id"], str):
+            data["request_id"] = str(data["request_id"])
+        
+        # 处理carrier字段
+        if "carrier" in data and isinstance(data["carrier"], dict):
+            carrier = data["carrier"]
+            
+            if "name" in carrier and not isinstance(carrier["name"], str):
+                carrier["name"] = str(carrier["name"]) if carrier["name"] is not None else "Unknown"
+                
+            if "type" in carrier and not isinstance(carrier["type"], str):
+                carrier["type"] = str(carrier["type"]) if carrier["type"] is not None else "Unknown"
+                
+            if "mobile_country_code" in carrier and carrier["mobile_country_code"] is not None and not isinstance(carrier["mobile_country_code"], str):
+                carrier["mobile_country_code"] = str(carrier["mobile_country_code"])
+                
+            if "mobile_network_code" in carrier and carrier["mobile_network_code"] is not None and not isinstance(carrier["mobile_network_code"], str):
+                carrier["mobile_network_code"] = str(carrier["mobile_network_code"])
+        
+        # 处理portability字段
+        if "portability" in data and isinstance(data["portability"], dict):
+            portability = data["portability"]
+            
+            if "portable" in portability and not isinstance(portability["portable"], bool):
+                portability["portable"] = bool(portability["portable"])
+                
+            if "ported" in portability and not isinstance(portability["ported"], bool):
+                portability["ported"] = bool(portability["ported"])
+                
+            if "spid" in portability and portability["spid"] is not None and not isinstance(portability["spid"], str):
+                portability["spid"] = str(portability["spid"])
+                
+            if "ocn" in portability and portability["ocn"] is not None and not isinstance(portability["ocn"], str):
+                portability["ocn"] = str(portability["ocn"])
+            
+            # 处理previous_carrier字段
+            if "previous_carrier" in portability and isinstance(portability["previous_carrier"], dict):
+                prev_carrier = portability["previous_carrier"]
+                
+                if "name" in prev_carrier and not isinstance(prev_carrier["name"], str):
+                    prev_carrier["name"] = str(prev_carrier["name"]) if prev_carrier["name"] is not None else "Unknown"
+                    
+                if "type" in prev_carrier and not isinstance(prev_carrier["type"], str):
+                    prev_carrier["type"] = str(prev_carrier["type"]) if prev_carrier["type"] is not None else "Unknown"
+                    
+                if "mobile_country_code" in prev_carrier and prev_carrier["mobile_country_code"] is not None and not isinstance(prev_carrier["mobile_country_code"], str):
+                    prev_carrier["mobile_country_code"] = str(prev_carrier["mobile_country_code"])
+                    
+                if "mobile_network_code" in prev_carrier and prev_carrier["mobile_network_code"] is not None and not isinstance(prev_carrier["mobile_network_code"], str):
+                    prev_carrier["mobile_network_code"] = str(prev_carrier["mobile_network_code"])
     
     def batch_lookup(self, 
                     numbers: List[str], 
