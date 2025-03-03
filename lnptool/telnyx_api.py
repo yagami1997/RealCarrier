@@ -114,9 +114,9 @@ class TelnyxAPI:
             elif status_code == 404:
                 user_suggestion = "请求的资源不存在，请检查电话号码格式是否正确或该号码可能不在Telnyx数据库中。"
             elif status_code == 429:
-                user_suggestion = "请求频率超限，请稍后再试或降低请求频率。批量查询时可以增加delay参数的值。"
+                user_suggestion = "请求频率超限，请稍后再试或降低请求频率。批量查询时可以增加rate_limit参数的值。"
             elif status_code >= 500:
-                user_suggestion = "Telnyx服务器暂时不可用，请稍后再试。如果问题持续存在，请检查Telnyx状态页面(https://status.telnyx.com)或联系Telnyx支持。"
+                user_suggestion = "Telnyx服务器暂时不可用，请稍后再试。如果问题持续存在，请检查Telnyx状态页面(https://status.telnyx.com)。"
             
             try:
                 error_data = response.json()
@@ -130,11 +130,13 @@ class TelnyxAPI:
             if user_suggestion:
                 error_msg = f"{error_msg}\n建议：{user_suggestion}"
             
-            logger.error(f"API请求失败: {error_msg}")
+            # 只记录简短日志，不显示详细错误信息
+            # 详细信息会在表格中展示
+            logger.debug(f"API请求失败 (HTTP {status_code})")
             raise APIError(error_msg, response.status_code, response.text)
         except ValueError:
             error_msg = "响应中包含无效的JSON数据"
-            logger.error(error_msg)
+            logger.debug(error_msg)
             raise APIError(error_msg, response.status_code, response.text)
     
     def _make_request(self, method: str, endpoint: str, params: Optional[Dict[str, Any]] = None, 
@@ -322,9 +324,8 @@ class TelnyxAPI:
             )
             
         except APIError as e:
-            # 创建错误结果
+            # 创建错误结果，减少冗余日志输出
             error_message = str(e)
-            logger.error(f"创建错误结果: {error_message}")
             
             # 创建一个有效的错误结果对象
             return LookupResult(
@@ -359,22 +360,30 @@ class TelnyxAPI:
         Returns:
             str: 格式化后的电话号码
         """
-        # 移除所有非数字字符
+        # 如果是空，返回空字符串
+        if not phone_number:
+            return ""
+            
+        # 移除所有非数字字符(包括括号、破折号、空格等)
         digits_only = ''.join(c for c in phone_number if c.isdigit())
         
         # 处理美国/加拿大号码
-        if phone_number.startswith('+1') or (not phone_number.startswith('+') and len(digits_only) == 10):
-            # 确保有国家代码
-            if len(digits_only) == 10:
-                return f"+1{digits_only}"
-            elif len(digits_only) == 11 and digits_only.startswith('1'):
-                return f"+{digits_only}"
-            else:
-                return f"+{digits_only}"  # 可能是不正确的格式，但尝试处理
-        
-        # 其他国际号码
-        if not phone_number.startswith('+') and len(digits_only) > 10:
+        if len(digits_only) == 10:
+            # 10位数字，添加美国国家代码+1
+            return f"+1{digits_only}"
+        elif len(digits_only) == 11 and digits_only.startswith('1'):
+            # 11位数字且以1开头，确保格式为+1后接10位数字
+            return f"+1{digits_only[1:]}"
+        elif phone_number.startswith('+'):
+            # 已经是E.164格式（以+开头），保持原样
+            return phone_number
+        elif len(digits_only) > 10:
+            # 其他国际号码，保持+号前缀
             return f"+{digits_only}"
-        
-        # 如果已经是E.164格式，或无法处理，则原样返回
-        return phone_number
+        else:
+            # 对于短于10位的号码，尝试添加+1前缀
+            # 这可能是格式错误，但为了兼容性仍然处理
+            if len(digits_only) > 0:
+                return f"+1{digits_only}"
+            else:
+                return phone_number

@@ -72,19 +72,18 @@ class LookupService:
         if not cache_hit:
             # 通过API查询
             try:
-                with console.status(f"查询号码 {formatted_number} 中...", spinner="dots"):
-                    result = self.api.lookup_number(formatted_number)
-                    
-                    # 检查是否是错误结果
-                    if result.status.startswith("error:"):
-                        logger.warning(f"API lookup failed: {result.status}")
-                        return result
-                    
-                    # 缓存结果（如果查询成功）
-                    if self.use_cache and self.cache:
-                        self.cache.set(formatted_number, result.dict())
-                    
+                # 修改为静默模式，减少错误信息输出
+                result = self.api.lookup_number(formatted_number)
+                
+                # 检查是否是错误结果，但不输出日志
+                if result.status.startswith("error:"):
                     return result
+                
+                # 缓存结果（如果查询成功）
+                if self.use_cache and self.cache:
+                    self.cache.set(formatted_number, result.dict())
+                
+                return result
             except Exception as e:
                 logger.error(f"Unexpected error during lookup: {e}")
                 # 创建一个安全的错误结果对象
@@ -202,15 +201,13 @@ class LookupService:
         delay = 1.0 / rate_limit  # 控制请求速率的延迟
         last_request_time = 0
         
-        # 使用Rich进度条
+        # 使用Rich进度条，简化显示
         with Progress(
             SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
             BarColumn(),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            TimeElapsedColumn(),
         ) as progress:
-            task = progress.add_task("正在查询...", total=len(unique_numbers))
+            task = progress.add_task("", total=len(unique_numbers))
             
             for i, number in enumerate(unique_numbers):
                 # 控制API请求速率
@@ -218,13 +215,12 @@ class LookupService:
                 if i > 0 and current_time - last_request_time < delay:
                     time.sleep(delay - (current_time - last_request_time))
                 
-                # 查询号码
+                # 查询号码，使用静默模式
                 try:
                     result = self.lookup_number(number)
                 except Exception as e:
-                    # 捕获所有异常并创建错误结果对象
+                    # 捕获所有异常并创建错误结果对象，但不重复输出详细错误
                     error_message = str(e)
-                    console.print(f"[bold yellow]警告：查询号码 {number} 时发生错误: {error_message}[/bold yellow]")
                     
                     # 创建错误结果对象
                     result = LookupResult(
@@ -251,8 +247,8 @@ class LookupService:
                 results.append(result)
                 last_request_time = time.time()
                 
-                # 更新进度
-                progress.update(task, advance=1, description=f"正在查询 ({i+1}/{len(unique_numbers)})")
+                # 更新进度，简化描述
+                progress.update(task, advance=1)
         
         # 如果指定了输出文件，保存结果
         if output_file:
@@ -377,41 +373,45 @@ def display_lookup_result(result: LookupResult) -> None:
     Args:
         result: 查询结果
     """
-    table = Table(title=f"电话号码 {result.phone_number} 查询结果", show_header=False, box=box.ROUNDED)
-    table.add_column("字段", style="cyan")
-    table.add_column("值")
+    # 将E.164格式号码转换为美式格式显示
+    phone_e164 = result.phone_number
     
-    # 处理错误结果
+    # 确保是美国号码格式并提取数字部分
+    if phone_e164.startswith("+1") and len(phone_e164) >= 12:
+        digits = phone_e164[2:]  # 去掉+1前缀
+        formatted_phone = f"({digits[:3]}){digits[3:6]}-{digits[6:]}"
+    else:
+        formatted_phone = phone_e164  # 如果不是标准格式，则保持原样
+    
+    # 创建表格
+    title = f"电话号码 {formatted_phone} 查询结果"
+    table = Table(title=title, show_header=False, box=box.ROUNDED, expand=True)
+    table.add_column("字段", style="cyan")
+    table.add_column("值", style="white")
+    
+    # 检查是否是错误结果
     if result.status.startswith("error:"):
+        # 提取错误信息
         error_message = result.status[6:].strip()
-        table.add_row("查询状态", "[bold red]失败[/bold red]")
         
-        # 检查是否包含建议信息（由TelnyxAPI._handle_response添加）
-        if "建议：" in error_message:
-            # 分割错误信息和建议
-            parts = error_message.split("建议：")
-            error_info = parts[0].strip()
-            suggestion = parts[1].strip()
-            
-            table.add_row("错误信息", f"[red]{error_info}[/red]")
-            table.add_row("建议", f"[yellow]{suggestion}[/yellow]")
+        # 显示基本状态信息
+        table.add_row("查询状态", "[red]失败[/red]")
+        
+        # 提供更详细的错误原因描述
+        if "403" in error_message:
+            table.add_row("错误原因", "[red]403错误，请检查Telnyx API账户状态，是否完成KYC认证或者余额足够[/red]")
+        elif "401" in error_message:
+            table.add_row("错误原因", "[red]401错误，API密钥无效或已过期，请重新设置密钥[/red]")
+        elif "404" in error_message:
+            table.add_row("错误原因", "[red]404错误，请检查号码格式是否正确，或该号码不存在于Telnyx数据库[/red]")
+        elif "429" in error_message:
+            table.add_row("错误原因", "[red]429错误，请求频率过高，请降低请求速率或稍后再试[/red]")
+        elif any(code in error_message for code in ["500", "502", "503", "504"]):
+            table.add_row("错误原因", "[red]服务器错误(5xx)，Telnyx服务暂时不可用，请稍后再试[/red]")
+        elif "timeout" in error_message.lower():
+            table.add_row("错误原因", "[red]请求超时，请检查网络连接或稍后再试[/red]")
         else:
-            # 显示错误信息
-            table.add_row("错误信息", f"[red]{error_message}[/red]")
-            
-            # 根据错误类型提供一般性建议
-            if "403" in error_message:
-                table.add_row("建议", "[yellow]请确保您的Telnyx账户状态正常，已完成KYC认证并且有足够的余额。访问Telnyx控制台检查账户状态。[/yellow]")
-            elif "401" in error_message:
-                table.add_row("建议", "[yellow]请检查您的API密钥是否正确。运行 'lnp config set-key' 重新设置API密钥。[/yellow]")
-            elif "404" in error_message:
-                table.add_row("建议", "[yellow]请检查电话号码格式是否正确，或者该号码可能不存在于Telnyx数据库中。[/yellow]")
-            elif "429" in error_message:
-                table.add_row("建议", "[yellow]请求频率过高，请降低请求速率或稍后再试。[/yellow]")
-            elif "502" in error_message or "503" in error_message:
-                table.add_row("建议", "[yellow]Telnyx服务器暂时不可用，请稍后再试。[/yellow]")
-            elif "timeout" in error_message.lower():
-                table.add_row("建议", "[yellow]请求超时，请检查网络连接或稍后再试。[/yellow]")
+            table.add_row("错误原因", "[red]未知API错误，请联系技术支持[/red]")
         
         console.print(table)
         return
@@ -423,21 +423,25 @@ def display_lookup_result(result: LookupResult) -> None:
     
     # 添加携号转网信息
     if result.portability:
-        table.add_row("是否可携号转网", "是" if result.portability.portable else "否")
-        table.add_row("是否已携号转网", "是" if result.portability.ported else "否")
+        portable_status = "[green]是[/green]" if result.portability.portable else "[red]否[/red]"
+        ported_status = "[green]是[/green]" if result.portability.ported else "[red]否[/red]"
         
-        if result.portability.ported and result.portability.previous_carrier:
-            table.add_row("原运营商", result.portability.previous_carrier.name)
+        table.add_row("可携号转网", portable_status)
+        table.add_row("已携号转网", ported_status)
         
         if result.portability.spid:
             table.add_row("服务商ID", result.portability.spid)
         
         if result.portability.ocn:
             table.add_row("运营商代码", result.portability.ocn)
-    
-    # 添加查询状态信息
-    if result.status != "success":
-        table.add_row("查询状态", f"[bold yellow]{result.status}[/bold yellow]")
+        
+        # 显示前一个运营商信息
+        if result.portability.previous_carrier:
+            table.add_row("前运营商", result.portability.previous_carrier.name)
+            table.add_row("前号码类型", result.portability.previous_carrier.type)
+    else:
+        table.add_row("可携号转网", "[red]未知[/red]")
+        table.add_row("已携号转网", "[red]未知[/red]")
     
     console.print(table)
 
@@ -518,12 +522,12 @@ def display_batch_summary(results: List[LookupResult]) -> None:
         
         console.print(carrier_table)
     
-    # 显示错误类型分布
+    # 显示错误类型统计
     if error_types:
-        error_table = Table(title="错误类型分布", show_header=True, box=box.ROUNDED)
-        error_table.add_column("错误类型", style="red")
-        error_table.add_column("数量", style="white")
-        error_table.add_column("百分比", style="yellow")
+        error_table = Table(title="错误类型统计", show_header=True, box=box.ROUNDED)
+        error_table.add_column("错误类型", style="cyan")
+        error_table.add_column("次数", style="white")
+        error_table.add_column("百分比", style="red")
         
         # 按数量排序
         sorted_errors = sorted(error_types.items(), key=lambda x: x[1], reverse=True)
@@ -532,25 +536,3 @@ def display_batch_summary(results: List[LookupResult]) -> None:
             error_table.add_row(error_type, str(count), f"{count/failed*100:.1f}%" if failed > 0 else "0%")
         
         console.print(error_table)
-        
-        # 提供常见错误的解决建议
-        if failed > 0:
-            console.print("\n[bold yellow]常见错误解决方案：[/bold yellow]")
-            
-            if any(e for e in error_types if "403" in e):
-                console.print("- [yellow]账户权限问题 (403)：请确保您的Telnyx账户状态正常，已完成KYC认证并且有足够的余额。访问Telnyx控制台检查账户状态。[/yellow]")
-            
-            if any(e for e in error_types if "401" in e):
-                console.print("- [yellow]API密钥无效 (401)：请检查您的API密钥是否正确。运行 'lnp config set-key' 重新设置API密钥。[/yellow]")
-            
-            if any(e for e in error_types if "404" in e):
-                console.print("- [yellow]号码不存在 (404)：请检查电话号码格式是否正确，或者该号码可能不存在于Telnyx数据库中。[/yellow]")
-            
-            if any(e for e in error_types if "429" in e):
-                console.print("- [yellow]请求频率限制 (429)：请降低请求速率，可以增加批量查询的rate_limit参数值。[/yellow]")
-            
-            if any(e for e in error_types if "5xx" in e):
-                console.print("- [yellow]服务器错误 (5xx)：Telnyx服务器暂时不可用，请稍后再试。如果问题持续存在，请检查Telnyx状态页面。[/yellow]")
-            
-            if any(e for e in error_types if "超时" in e):
-                console.print("- [yellow]请求超时：请检查您的网络连接，或者Telnyx服务可能响应缓慢，稍后再试。[/yellow]")

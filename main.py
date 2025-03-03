@@ -22,7 +22,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from lnptool.config import get_api_key, set_api_key, is_configured, get_config
 from lnptool.telnyx_api import TelnyxAPI
 from lnptool.lookup import LookupService, display_lookup_result, display_batch_summary
-from lnptool.utils import is_valid_api_key, print_error, print_success, print_warning, print_info
+from lnptool.utils import is_valid_api_key, print_error, print_success, print_warning, print_info, phone_input
 
 console = Console()
 
@@ -32,12 +32,13 @@ def clear_screen():
 
 def show_logo():
     """显示程序标志"""
+    # 创建主标题面板
     console.print(Panel.fit(
-        "[bold blue]RealCarrier[/bold blue] - [cyan]Telnyx LNP查询工具[/cyan]",
+        "[bold blue]RealCarrier[/bold blue] - [cyan]美国电话号码状态查询器[/cyan]",
         border_style="green",
         padding=(1, 2),
         title="v0.1.0",
-        subtitle="by RealCarrier Team"
+        subtitle="by Yagami1997"
     ))
     console.print()
 
@@ -133,13 +134,11 @@ def lookup_number():
         input("\n按Enter键返回主菜单...")
         return
     
-    # 输入电话号码
-    console.print("请输入要查询的电话号码 (格式: +1XXXXXXXXXX):")
-    phone_number = Prompt.ask("> ")
-    
-    # 确认号码
-    console.print(f"\n您要查询的电话号码是: [bold]{phone_number}[/bold]")
-    if not Confirm.ask("是否继续?"):
+    # 使用新的phone_input函数获取电话号码
+    try:
+        from lnptool.utils import phone_input
+        phone_number = phone_input("请输入美国电话号码", use_rich=True)
+    except (KeyboardInterrupt, EOFError):
         print_info("操作已取消。")
         input("\n按Enter键返回主菜单...")
         return
@@ -357,6 +356,10 @@ def main():
         while True:
             clear_screen()
             show_logo()
+            
+            # 显示GitHub链接（靠左对齐）
+            console.print(f"项目地址: [link=https://github.com/yagami1997/RealCarrier]github.com/yagami1997/RealCarrier[/link]")
+            console.print()
             
             # 显示API密钥状态
             status, masked_key = check_api_key_status()

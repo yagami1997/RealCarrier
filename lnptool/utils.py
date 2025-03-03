@@ -55,36 +55,62 @@ def configure_logging(verbose: bool = False) -> None:
     logging.info(f"Verbose logging: {verbose}")
 
 
-def validate_phone_number(ctx: click.Context, param: click.Parameter, value: str) -> str:
+def validate_phone_number(ctx: click.Context = None, param: click.Parameter = None, value: str = None) -> str:
     """
-    验证电话号码格式
+    验证电话号码格式，支持Click回调和直接调用两种方式
     
     Args:
-        ctx: Click上下文
-        param: 参数对象
+        ctx: Click上下文（可选）
+        param: 参数对象（可选）
         value: 电话号码
         
     Returns:
         str: 有效的电话号码
         
     Raises:
-        click.BadParameter: 如果电话号码格式无效
+        click.BadParameter: 如果作为Click回调使用且电话号码格式无效
+        ValueError: 如果直接调用且电话号码格式无效
     """
     if not value:
         return value
     
-    # 移除非数字字符
+    # 帮助用户处理常见的美国电话号码格式
+    # 比如 (626)630-8117 或 626-630-8117 等
+    
+    # 移除所有非数字字符
     digits_only = ''.join(c for c in value if c.isdigit())
     
     # 验证格式
     if len(digits_only) not in (10, 11) or (len(digits_only) == 11 and not digits_only.startswith('1')):
-        raise click.BadParameter(f"请提供有效的美国电话号码。可以是10位数字或以1开头的11位数字。")
+        error_msg = "请提供有效的美国电话号码，格式为10位数字或以1开头的11位数字"
+        if ctx:
+            # 作为Click回调使用
+            raise click.BadParameter(error_msg)
+        else:
+            # 直接调用
+            raise ValueError(error_msg)
     
     # 格式化为E.164格式
     if len(digits_only) == 10:
-        return f"+1{digits_only}"
-    else:
-        return f"+{digits_only}"
+        formatted = f"+1{digits_only}"
+        formatted_display = f"({digits_only[:3]}){digits_only[3:6]}-{digits_only[6:]}"
+    else:  # 11位数字且以1开头
+        # 确保使用后10位数字，避免重复国家代码
+        formatted = f"+1{digits_only[1:]}"
+        formatted_display = f"({digits_only[1:4]}){digits_only[4:7]}-{digits_only[7:]}"
+    
+    # 显示友好提示
+    if ctx:
+        click.echo(f"您要查询的电话号码是: {formatted_display}")
+        
+        # 确认是否继续
+        if click.confirm("是否继续?", default=True):
+            return formatted
+        else:
+            click.echo("操作已取消")
+            sys.exit(0)
+    
+    return formatted
 
 
 def validate_csv_file(ctx: click.Context, param: click.Parameter, value: str) -> str:
@@ -208,6 +234,67 @@ def safe_input(prompt: str, password: bool = False) -> str:
     except (click.Abort, KeyboardInterrupt):
         print("\n操作已取消")
         sys.exit(1)
+
+
+def phone_input(prompt: str = "请输入10位美国电话号码", use_rich: bool = False) -> str:
+    """
+    专门用于电话号码输入，实现预填+1的效果
+    
+    Args:
+        prompt: 提示消息
+        use_rich: 是否使用Rich UI库
+        
+    Returns:
+        str: 格式化后的电话号码（E.164格式）
+    """
+    try:
+        # 显示提示信息，明确展示+1已经作为前缀
+        print(f"{prompt} (+1已添加):")
+        print("+1", end="", flush=True)  # 直接打印+1前缀
+        
+        # 获取用户输入
+        user_input = input()
+        phone = "+1" + user_input
+        
+        # 处理用户可能自己输入了完整号码的情况
+        if user_input.startswith("+1"):
+            phone = user_input
+        if user_input.startswith("1") and len(user_input) >= 11:
+            phone = "+1" + user_input[1:]
+            
+        # 提取所有数字
+        digits = ''.join(c for c in phone if c.isdigit())
+        
+        # 确保格式正确
+        if len(digits) < 11 or (len(digits) == 11 and not digits.startswith('1')):
+            print_error("号码格式不正确，请在+1后输入10位美国电话号码")
+            return phone_input(prompt)
+        
+        # 格式化为E.164格式
+        formatted = f"+1{digits[-10:]}"
+            
+        # 显示美式格式进行确认
+        last_ten = formatted[-10:]
+        formatted_display = f"({last_ten[:3]}){last_ten[3:6]}-{last_ten[6:]}"
+        
+        if use_rich:
+            from rich.console import Console
+            console = Console()
+            console.print(f"您输入的电话号码是: [bold]{formatted_display}[/bold]")
+            from rich.prompt import Confirm
+            if Confirm.ask("是否继续?", default=True):
+                return formatted
+        else:
+            print_info(f"您输入的电话号码是: {formatted_display}")
+            if click.confirm("是否继续?", default=True):
+                return formatted
+            
+        print_info("已取消输入，请重新输入")
+        return phone_input(prompt, use_rich)
+            
+    except (KeyboardInterrupt, EOFError, click.Abort):
+        print("\n操作已取消")
+        raise
 
 
 def retry_on_error(func: Callable, *args: Any, retries: int = 3, delay: float = 1.0, **kwargs: Any) -> Any:
