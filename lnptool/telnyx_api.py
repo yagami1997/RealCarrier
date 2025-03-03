@@ -190,6 +190,9 @@ class TelnyxAPI:
             data = response.get("data", {})
             
             carrier_data = data.get("carrier", {})
+            if not isinstance(carrier_data, dict):
+                carrier_data = {}
+                
             carrier = CarrierInfo(
                 name=carrier_data.get("name", "Unknown"),
                 type=carrier_data.get("type", "Unknown"),
@@ -198,7 +201,14 @@ class TelnyxAPI:
             )
             
             portability_data = data.get("portability", {})
+            # 确保portability_data是字典类型
+            if not isinstance(portability_data, dict):
+                portability_data = {}
+                
             previous_carrier_data = portability_data.get("previous_carrier", {})
+            # 确保previous_carrier_data是字典类型
+            if not isinstance(previous_carrier_data, dict):
+                previous_carrier_data = {}
             
             previous_carrier = None
             if previous_carrier_data:
@@ -209,9 +219,19 @@ class TelnyxAPI:
                     mobile_network_code=previous_carrier_data.get("mobile_network_code")
                 )
             
+            # 确保获取便携性信息时的值是合适的类型
+            portable_value = portability_data.get("portable", False)
+            ported_value = portability_data.get("ported", False)
+            
+            # 确保布尔值
+            if not isinstance(portable_value, bool):
+                portable_value = bool(portable_value)
+            if not isinstance(ported_value, bool):
+                ported_value = bool(ported_value)
+                
             portability = PortabilityInfo(
-                portable=portability_data.get("portable", False),
-                ported=portability_data.get("ported", False),
+                portable=portable_value,
+                ported=ported_value,
                 spid=portability_data.get("spid"),
                 ocn=portability_data.get("ocn"),
                 previous_carrier=previous_carrier

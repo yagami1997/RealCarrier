@@ -145,7 +145,7 @@ def is_valid_api_key(api_key: str) -> bool:
         bool: 如果API密钥格式有效，返回True
     """
     # Telnyx API密钥通常是以KEY开头的字符串，后跟一系列字母数字字符
-    pattern = r'^KEY_[A-Za-z0-9_-]+$'
+    pattern = r'^KEY[A-Za-z0-9_-]+$'
     return bool(re.match(pattern, api_key))
 
 
