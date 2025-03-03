@@ -30,14 +30,6 @@ RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号
 
 ## 📥 安装指南
 
-### 方式一：使用pip安装（推荐）
-
-```bash
-pip install realcarrier
-```
-
-### 方式二：从源码安装
-
 ```bash
 # 克隆仓库
 git clone https://github.com/yourusername/realcarrier.git
