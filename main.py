@@ -14,6 +14,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, Confirm
 from rich import box
+from rich.text import Text
+from rich.layout import Layout
 
 # 将项目根目录添加到Python路径
 PROJECT_ROOT = Path(__file__).parent
@@ -125,21 +127,18 @@ def configure_api_key():
 def lookup_number():
     """查询单个电话号码"""
     clear_screen()
-    show_logo()
-    console.print("[bold]查询单个电话号码[/bold]\n")
+    print("\n查询单个电话号码\n")
+    
+    # 简化提示，删除颜色标记，并确保+1后有空格
+    phone_number = phone_input("请输入10位美国电话号码 (例如：877-242-7372): ", use_rich=True)
+    
+    # 如果用户取消输入，返回到主菜单
+    if not phone_number:
+        return
     
     # 检查API密钥
     if not is_configured():
         print_error("未配置API密钥！请先配置API密钥。")
-        input("\n按Enter键返回主菜单...")
-        return
-    
-    # 使用新的phone_input函数获取电话号码
-    try:
-        from lnptool.utils import phone_input
-        phone_number = phone_input("请输入美国电话号码", use_rich=True)
-    except (KeyboardInterrupt, EOFError):
-        print_info("操作已取消。")
         input("\n按Enter键返回主菜单...")
         return
     
