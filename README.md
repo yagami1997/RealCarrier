@@ -1,6 +1,7 @@
-# RealCarrier - Telnyx LNP查询工具 Alpha 0.1.0
+# RealCarrier Alpha 0.1.0
+## 基于Telnyx LNP的美国电话号码查询工具
 
-RealCarrier是一个轻量级命令行工具，用于查询美国电话号码的运营商信息和携号转网(LNP)状态。该工具基于Telnyx API，提供单个号码查询和批量查询功能。
+RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号码的运营商信息和携号转网(LNP)状态。该工具基于Telnyx API，提供单个号码查询和批量查询功能。
 
 ## 功能特点
 
@@ -95,4 +96,5 @@ pytest
 
 ## 免责声明
 
-本工具使用Telnyx API，可能会产生API调用费用。使用前请了解Telnyx的计费政策。
+- 本工具使用Telnyx API，可能会产生API调用费用。使用前请了解Telnyx的计费政策。
+- ⚠️友情提示，Telnyx需要完成KPY和充值才能正常使用，遇到API调用失败多数都是这个原因，而且Telnyx会给你发邮件说你的账户欠费被停用。
