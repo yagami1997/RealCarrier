@@ -51,3 +51,28 @@ RealCarrier.code-workspace
 # 测试数据
 test_data/
 !tests/fixtures/
+
+# 项目管理实际文件
+# 保留模板，但忽略真实文件
+project_management/plans/*
+!project_management/plans/*template*
+!project_management/plans/README*
+
+project_management/progress/*
+!project_management/progress/*template*
+!project_management/progress/README*
+
+project_management/reports/daily/*
+!project_management/reports/daily/*template*
+!project_management/reports/daily/README*
+
+project_management/reports/weekly/*
+!project_management/reports/weekly/*template*
+!project_management/reports/weekly/README*
+
+# 忽略任何可能包含实际项目信息的文件
+*actual*
+*real*
+*private*
+*confidential*
+*secret*
