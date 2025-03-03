@@ -30,10 +30,52 @@ RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号
 
 ## 📥 安装指南
 
+### MacOS
+
 ```bash
 # 克隆仓库
 git clone https://github.com/yourusername/realcarrier.git
 cd realcarrier
+
+# 创建虚拟环境
+python3 -m venv venv
+
+# 激活虚拟环境
+source venv/bin/activate
+
+# 安装依赖
+pip install -r requirements.txt
+```
+
+### Windows 11
+
+```bash
+# 克隆仓库
+git clone https://github.com/yourusername/realcarrier.git
+cd realcarrier
+
+# 创建虚拟环境
+python -m venv venv
+
+# 激活虚拟环境
+venv\Scripts\activate
+
+# 安装依赖
+pip install -r requirements.txt
+```
+
+### Ubuntu
+
+```bash
+# 克隆仓库
+git clone https://github.com/yourusername/realcarrier.git
+cd realcarrier
+
+# 创建虚拟环境
+python3 -m venv venv
+
+# 激活虚拟环境
+source venv/bin/activate
 
 # 安装依赖
 pip install -r requirements.txt
