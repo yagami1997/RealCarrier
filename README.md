@@ -71,7 +71,7 @@ RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/realcarrier.git
+git clone https://github.com/yagami1997/realcarrier.git
 cd realcarrier
 
 # 创建虚拟环境
@@ -88,7 +88,7 @@ pip install -r requirements.txt
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/realcarrier.git
+git clone https://github.com/yagami1997/realcarrier.git
 cd realcarrier
 
 # 创建虚拟环境
@@ -108,7 +108,7 @@ pip install -r requirements.txt
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/realcarrier.git
+git clone https://github.com/yagami1997/realcarrier.git
 cd realcarrier
 
 # 创建虚拟环境
