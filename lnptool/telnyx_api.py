@@ -192,12 +192,29 @@ class TelnyxAPI:
             carrier_data = data.get("carrier", {})
             if not isinstance(carrier_data, dict):
                 carrier_data = {}
+            
+            # 确保carrier字段数据类型正确
+            carrier_name = carrier_data.get("name", "Unknown")
+            if not isinstance(carrier_name, str):
+                carrier_name = str(carrier_name) if carrier_name is not None else "Unknown"
+                
+            carrier_type = carrier_data.get("type", "Unknown")
+            if not isinstance(carrier_type, str):
+                carrier_type = str(carrier_type) if carrier_type is not None else "Unknown"
+                
+            carrier_mcc = carrier_data.get("mobile_country_code")
+            if carrier_mcc is not None and not isinstance(carrier_mcc, str):
+                carrier_mcc = str(carrier_mcc)
+                
+            carrier_mnc = carrier_data.get("mobile_network_code")
+            if carrier_mnc is not None and not isinstance(carrier_mnc, str):
+                carrier_mnc = str(carrier_mnc)
                 
             carrier = CarrierInfo(
-                name=carrier_data.get("name", "Unknown"),
-                type=carrier_data.get("type", "Unknown"),
-                mobile_country_code=carrier_data.get("mobile_country_code"),
-                mobile_network_code=carrier_data.get("mobile_network_code")
+                name=carrier_name,
+                type=carrier_type,
+                mobile_country_code=carrier_mcc,
+                mobile_network_code=carrier_mnc
             )
             
             portability_data = data.get("portability", {})
@@ -212,14 +229,30 @@ class TelnyxAPI:
             
             previous_carrier = None
             if previous_carrier_data:
+                prev_name = previous_carrier_data.get("name", "Unknown")
+                if not isinstance(prev_name, str):
+                    prev_name = str(prev_name) if prev_name is not None else "Unknown"
+                    
+                prev_type = previous_carrier_data.get("type", "Unknown")
+                if not isinstance(prev_type, str):
+                    prev_type = str(prev_type) if prev_type is not None else "Unknown"
+                    
+                prev_mcc = previous_carrier_data.get("mobile_country_code")
+                if prev_mcc is not None and not isinstance(prev_mcc, str):
+                    prev_mcc = str(prev_mcc)
+                    
+                prev_mnc = previous_carrier_data.get("mobile_network_code")
+                if prev_mnc is not None and not isinstance(prev_mnc, str):
+                    prev_mnc = str(prev_mnc)
+                
                 previous_carrier = CarrierInfo(
-                    name=previous_carrier_data.get("name", "Unknown"),
-                    type=previous_carrier_data.get("type", "Unknown"),
-                    mobile_country_code=previous_carrier_data.get("mobile_country_code"),
-                    mobile_network_code=previous_carrier_data.get("mobile_network_code")
+                    name=prev_name,
+                    type=prev_type,
+                    mobile_country_code=prev_mcc,
+                    mobile_network_code=prev_mnc
                 )
             
-            # 确保获取便携性信息时的值是合适的类型
+            # 确保便携性信息字段数据类型正确
             portable_value = portability_data.get("portable", False)
             ported_value = portability_data.get("ported", False)
             
@@ -229,22 +262,43 @@ class TelnyxAPI:
             if not isinstance(ported_value, bool):
                 ported_value = bool(ported_value)
                 
+            spid = portability_data.get("spid")
+            if spid is not None and not isinstance(spid, str):
+                spid = str(spid)
+                
+            ocn = portability_data.get("ocn")
+            if ocn is not None and not isinstance(ocn, str):
+                ocn = str(ocn)
+                
             portability = PortabilityInfo(
                 portable=portable_value,
                 ported=ported_value,
-                spid=portability_data.get("spid"),
-                ocn=portability_data.get("ocn"),
+                spid=spid,
+                ocn=ocn,
                 previous_carrier=previous_carrier
             )
             
+            # 确保其他字段数据类型正确
+            phone_number_value = data.get("phone_number", formatted_number)
+            if not isinstance(phone_number_value, str):
+                phone_number_value = str(phone_number_value) if phone_number_value is not None else formatted_number
+                
+            country_code_value = data.get("country_code", "US")
+            if not isinstance(country_code_value, str):
+                country_code_value = str(country_code_value) if country_code_value is not None else "US"
+                
+            request_id = response.get("meta", {}).get("request_id")
+            if request_id is not None and not isinstance(request_id, str):
+                request_id = str(request_id)
+            
             return LookupResult(
-                phone_number=data.get("phone_number", formatted_number),
-                country_code=data.get("country_code", "US"),
+                phone_number=phone_number_value,
+                country_code=country_code_value,
                 carrier=carrier,
                 portability=portability,
                 status="success",
                 lookup_time=time.time(),
-                request_id=response.get("meta", {}).get("request_id")
+                request_id=request_id
             )
             
         except APIError as e:
