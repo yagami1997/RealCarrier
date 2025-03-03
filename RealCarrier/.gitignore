@@ -1,0 +1,50 @@
+# Python字节码
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C扩展
+*.so
+
+# 打包与分发
+dist/
+build/
+*.egg-info/
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# 单元测试/覆盖率报告
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# 开发环境
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 本地配置文件
+.env
+*.ini
+*.conf
+
+# 本地缓存与数据库
+*.db
+*.sqlite
+*.sqlite3
+.cache/
+
+# 日志文件
+*.log
+
+# 用户配置
+~/.lnptool/
+
+# 测试数据
+test_data/
+!tests/fixtures/

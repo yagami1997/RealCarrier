@@ -1,0 +1,15 @@
+# 核心依赖
+click>=8.0.0
+requests>=2.25.0
+rich>=12.0.0
+pandas>=1.3.0
+pydantic>=1.8.0
+keyring>=23.0.0
+typer>=0.7.0
+
+# 开发依赖
+pytest>=7.0.0
+black>=22.1.0
+flake8>=4.0.0
+mypy>=0.931
+coverage>=6.3.0
