@@ -39,8 +39,11 @@ pip install realcarrier
 ### 方式二：从源码安装
 
 ```bash
+# 克隆仓库
 git clone https://github.com/yourusername/realcarrier.git
 cd realcarrier
+
+# 安装
 pip install -e .
 ```
 
