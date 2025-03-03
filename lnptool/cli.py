@@ -1,25 +1,33 @@
 """
-命令行入口模块 - 处理命令行参数和交互
+命令行界面模块 - 提供命令行交互功能
 """
 
 import os
 import sys
+import time
+import json
 import logging
-from pathlib import Path
 from typing import Optional
+from datetime import datetime
+from pathlib import Path
 
 import click
 from rich.console import Console
+from rich.table import Table
 
+from lnptool import __version__
 from lnptool.config import get_config, set_api_key, delete_api_key, update_config_setting, is_configured
 from lnptool.cache import Cache
-from lnptool.lookup import LookupService, display_lookup_result, display_batch_summary
+from lnptool.lookup import LookupService, display_lookup_result, display_batch_summary, LookupResult, CarrierInfo, PortabilityInfo
+from lnptool.telnyx_api import TelnyxAPI
 from lnptool.utils import (
     configure_logging, validate_phone_number, validate_csv_file, 
     format_timestamp, print_error, print_warning, print_success, 
-    print_info, safe_input, is_valid_api_key
+    print_info, safe_input, is_valid_api_key, phone_input
 )
 
+# 获取日志记录器
+logger = logging.getLogger(__name__)
 console = Console()
 
 
@@ -129,28 +137,66 @@ def config_set(key: str, value: str) -> None:
 
 
 @cli.command('lookup')
-@click.argument('phone_number', callback=validate_phone_number)
+@click.argument('phone_number', required=False, callback=validate_phone_number)
 @click.option('--no-cache', is_flag=True, help='禁用缓存')
 def lookup(phone_number: str, no_cache: bool) -> None:
     """查询单个电话号码的信息"""
+    # 如果没有提供电话号码，则交互式询问
+    if not phone_number:
+        # 使用新的phone_input函数，采用更直观的前缀+1方式
+        phone_number = phone_input("请输入美国电话号码", use_rich=False)
+    
     try:
         service = LookupService(use_cache=not no_cache)
         result = service.lookup_number(phone_number)
         display_lookup_result(result)
     except Exception as e:
-        print_error(f"查询失败: {str(e)}")
-        logging.exception("查询出错", exc_info=e)
+        # 创建错误结果对象并通过表格显示
+        logger.debug(f"查询出错: {str(e)}")
+        error_result = LookupResult(
+            phone_number=phone_number,
+            country_code="US",
+            carrier=CarrierInfo(
+                name="Error", 
+                type="unknown", 
+                mobile_country_code=None, 
+                mobile_network_code=None
+            ),
+            portability=PortabilityInfo(
+                portable=False,
+                ported=False,
+                spid=None,
+                ocn=None,
+                previous_carrier=None
+            ),
+            status=f"error: {str(e)}",
+            lookup_time=time.time(),
+            request_id=None
+        )
+        display_lookup_result(error_result)
         sys.exit(1)
 
 
 @cli.command('batch')
-@click.argument('csv_file', callback=validate_csv_file)
+@click.argument('csv_file', required=False, callback=validate_csv_file)
 @click.option('--output', '-o', type=str, help='输出CSV文件路径')
 @click.option('--column', '-c', type=str, default='phone_number', help='包含电话号码的列名')
 @click.option('--rate-limit', type=float, help='每秒API请求数限制')
 @click.option('--no-cache', is_flag=True, help='禁用缓存')
 def batch(csv_file: str, output: Optional[str], column: str, rate_limit: Optional[float], no_cache: bool) -> None:
     """批量查询CSV文件中的电话号码"""
+    # 如果没有提供CSV文件路径，则交互式询问
+    if not csv_file:
+        while not csv_file:
+            file_path = safe_input("请输入CSV文件路径: ")
+            if os.path.exists(file_path):
+                if file_path.lower().endswith('.csv'):
+                    csv_file = file_path
+                else:
+                    print_error("请提供有效的CSV文件 (.csv)")
+            else:
+                print_error(f"文件不存在: {file_path}")
+                
     try:
         # 获取配置的速率限制
         if rate_limit is None:
@@ -169,8 +215,8 @@ def batch(csv_file: str, output: Optional[str], column: str, rate_limit: Optiona
         display_batch_summary(results)
         
     except Exception as e:
+        logger.debug(f"批量查询失败: {str(e)}")
         print_error(f"批量查询失败: {str(e)}")
-        logging.exception("批量查询出错", exc_info=e)
         sys.exit(1)
 
 
