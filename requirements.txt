@@ -1,19 +1,21 @@
 # RealCarrier项目依赖
-# 最后更新时间（PST）: 2025-03-03 12:50:45
+# 最后更新时间（PST）: 2025-03-04 11:25:00
 
 # 核心依赖
-click==8.1.8
-requests==2.32.3
-rich==13.9.4
-pandas==2.2.3
-pydantic==2.10.6
-keyring==25.6.0
-typer==0.15.2
+click==8.1.8        # CLI接口和工具函数
+requests==2.32.3    # API请求处理
+rich==13.9.4        # 终端美化和用户界面
+pandas==2.2.3       # 数据处理和CSV文件操作
+pydantic==2.10.6    # 数据验证和模型定义
+keyring==25.6.0     # 安全存储API密钥
+psutil==5.9.8       # 系统信息收集和显示
 
 # 开发依赖
-pytest==8.3.5
-black==25.1.0
-flake8==7.1.2
-mypy==1.15.0
-coverage==7.6.12
-setuptools==75.8.2
+pytest==8.3.5       # 单元测试
+black==25.1.0       # 代码格式化
+flake8==7.1.2       # 代码风格检查
+mypy==1.15.0        # 类型检查
+coverage==7.6.12    # 测试覆盖率分析
+setuptools==75.8.2  # 打包工具
+
+# 注：typer依赖已移除，因为代码中使用click而非typer
