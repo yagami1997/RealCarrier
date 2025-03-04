@@ -16,6 +16,7 @@ from rich import box
 from lnptool.telnyx_api import TelnyxAPI, LookupResult, CarrierInfo, PortabilityInfo
 from lnptool.cache import Cache
 from lnptool.config import get_api_key, is_configured
+from lnptool.i18n import t
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -253,55 +254,82 @@ class LookupService:
         # 如果指定了输出文件，保存结果
         if output_file:
             self.export_results_to_csv(results, output_file)
-            console.print(f"[green]查询结果已保存至：[bold]{output_file}[/bold][/green]")
+            console.print(f"[green]{t('results_saved_to')}：[bold]{output_file}[/bold][/green]")
             
         return results
     
-    def batch_lookup_from_csv(self, 
-                             csv_file: str, 
-                             output_file: Optional[str] = None,
-                             number_column: str = "phone_number",
-                             rate_limit: float = 2.0) -> List[LookupResult]:
+    def batch_lookup_from_csv(self, csv_file, phone_column=None, output_file=None):
         """
-        从CSV文件批量查询电话号码
+        从CSV文件执行批量查询
         
         Args:
-            csv_file: 输入CSV文件路径
-            output_file: 输出CSV文件路径
-            number_column: 包含电话号码的列名
-            rate_limit: 每秒最大请求数
-            
-        Returns:
-            List[LookupResult]: 查询结果列表
+            csv_file: CSV文件路径
+            phone_column: 电话号码列名或索引
+            output_file: 输出文件路径
         """
-        try:
-            # 读取CSV文件
-            df = pd.read_csv(csv_file)
-            
-            if number_column not in df.columns:
-                available_columns = ", ".join(df.columns)
-                console.print(f"[bold red]错误：CSV文件中没有找到名为 '{number_column}' 的列。[/bold red]")
-                console.print(f"可用的列：{available_columns}")
-                raise ValueError(f"Column '{number_column}' not found in CSV file")
-            
-            # 提取电话号码列表
-            numbers = df[number_column].astype(str).tolist()
-            console.print(f"从CSV文件中读取了 [bold]{len(numbers)}[/bold] 个号码")
-            
-            # 设置默认输出文件
-            if not output_file:
-                base_name = Path(csv_file).stem
-                output_file = f"{base_name}_results.csv"
-            
-            # 执行批量查询
-            return self.batch_lookup(numbers, output_file, rate_limit)
+        from rich.progress import Progress
         
-        except (pd.errors.EmptyDataError, pd.errors.ParserError) as e:
-            console.print(f"[bold red]错误：无法解析CSV文件：[/bold red]{str(e)}")
-            raise
-        except FileNotFoundError:
-            console.print(f"[bold red]错误：找不到文件：[/bold red]{csv_file}")
-            raise
+        # 读取CSV文件
+        try:
+            # 尝试不同的编码
+            encodings = ['utf-8-sig', 'utf-8', 'gbk', 'latin-1']
+            df = None
+            
+            for encoding in encodings:
+                try:
+                    df = pd.read_csv(csv_file, encoding=encoding)
+                    break  # 如果成功读取，跳出循环
+                except UnicodeDecodeError:
+                    continue  # 如果解码错误，尝试下一个编码
+            
+            if df is None:
+                # 所有编码都失败，使用最通用的latin-1
+                df = pd.read_csv(csv_file, encoding='latin-1')
+        
+        except Exception as e:
+            raise ValueError(f"无法读取CSV文件: {str(e)}")
+        
+        # 确定电话号码列
+        if phone_column is None:
+            # 自动检测电话号码列
+            for col in df.columns:
+                if 'phone' in col.lower() or 'number' in col.lower() or 'tel' in col.lower():
+                    phone_column = col
+                    break
+            
+            # 如果没有找到明确的电话号码列，使用第一列
+            if phone_column is None:
+                phone_column = df.columns[0]
+        
+        # 获取要查询的电话号码列表
+        phone_numbers = df[phone_column].astype(str).tolist()
+        
+        # 创建带进度条的批量查询
+        results = []
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn(f"[bold green]{t('read_numbers_from_csv')}[/bold green] {len(phone_numbers)} {t('numbers')}"),
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeElapsedColumn(),
+        ) as progress:
+            task = progress.add_task(t("processing"), total=len(phone_numbers))
+            
+            for phone in phone_numbers:
+                # 查询电话号码
+                result = self.lookup_number(phone)
+                results.append(result)
+                
+                # 更新进度
+                progress.update(task, advance=1)
+        
+        # 将结果写入CSV文件
+        if output_file:
+            self.export_results_to_csv(results, output_file)
+            console.print(f"[green]{t('results_saved_to')}: {output_file}[/green]")
+        
+        return results
     
     @staticmethod
     def export_results_to_csv(results: List[LookupResult], output_file: str) -> None:
@@ -384,10 +412,10 @@ def display_lookup_result(result: LookupResult) -> None:
         formatted_phone = phone_e164  # 如果不是标准格式，则保持原样
     
     # 创建表格
-    title = f"电话号码 {formatted_phone} 查询结果"
+    title = f"{t('phone_number')} {formatted_phone} {t('query_result_title')}"
     table = Table(title=title, show_header=False, box=box.ROUNDED, expand=True)
-    table.add_column("字段", style="cyan")
-    table.add_column("值", style="white")
+    table.add_column(t("field"), style="cyan")
+    table.add_column(t("value"), style="white")
     
     # 检查是否是错误结果
     if result.status.startswith("error:"):
@@ -395,53 +423,53 @@ def display_lookup_result(result: LookupResult) -> None:
         error_message = result.status[6:].strip()
         
         # 显示基本状态信息
-        table.add_row("查询状态", "[red]失败[/red]")
+        table.add_row(t("query_status"), "[red]" + t("failed") + "[/red]")
         
         # 提供更详细的错误原因描述
         if "403" in error_message:
-            table.add_row("错误原因", "[red]403错误，请检查Telnyx API账户状态，是否完成KYC认证或者余额足够[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_403") + "[/red]")
         elif "401" in error_message:
-            table.add_row("错误原因", "[red]401错误，API密钥无效或已过期，请重新设置密钥[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_401") + "[/red]")
         elif "404" in error_message:
-            table.add_row("错误原因", "[red]404错误，请检查号码格式是否正确，或该号码不存在于Telnyx数据库[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_404") + "[/red]")
         elif "429" in error_message:
-            table.add_row("错误原因", "[red]429错误，请求频率过高，请降低请求速率或稍后再试[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_429") + "[/red]")
         elif any(code in error_message for code in ["500", "502", "503", "504"]):
-            table.add_row("错误原因", "[red]服务器错误(5xx)，Telnyx服务暂时不可用，请稍后再试[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_5xx") + "[/red]")
         elif "timeout" in error_message.lower():
-            table.add_row("错误原因", "[red]请求超时，请检查网络连接或稍后再试[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_timeout") + "[/red]")
         else:
-            table.add_row("错误原因", "[red]未知API错误，请联系技术支持[/red]")
+            table.add_row(t("error_reason"), "[red]" + t("error_unknown") + "[/red]")
         
         console.print(table)
         return
     
     # 添加基本信息
-    table.add_row("国家", result.country_code)
-    table.add_row("运营商", result.carrier.name)
-    table.add_row("号码类型", result.carrier.type)
+    table.add_row(t("country"), result.country_code)
+    table.add_row(t("carrier"), result.carrier.name)
+    table.add_row(t("number_type"), result.carrier.type)
     
     # 添加携号转网信息
     if result.portability:
-        portable_status = "[green]是[/green]" if result.portability.portable else "[red]否[/red]"
-        ported_status = "[green]是[/green]" if result.portability.ported else "[red]否[/red]"
+        portable_status = "[green]" + t("yes") + "[/green]" if result.portability.portable else "[red]" + t("no") + "[/red]"
+        ported_status = "[green]" + t("yes") + "[/green]" if result.portability.ported else "[red]" + t("no") + "[/red]"
         
-        table.add_row("可携号转网", portable_status)
-        table.add_row("已携号转网", ported_status)
+        table.add_row(t("portable"), portable_status)
+        table.add_row(t("ported"), ported_status)
         
         if result.portability.spid:
-            table.add_row("服务商ID", result.portability.spid)
+            table.add_row(t("service_provider_id"), result.portability.spid)
         
         if result.portability.ocn:
-            table.add_row("运营商代码", result.portability.ocn)
+            table.add_row(t("carrier_code"), result.portability.ocn)
         
         # 显示前一个运营商信息
         if result.portability.previous_carrier:
-            table.add_row("前运营商", result.portability.previous_carrier.name)
-            table.add_row("前号码类型", result.portability.previous_carrier.type)
+            table.add_row(t("previous_carrier"), result.portability.previous_carrier.name)
+            table.add_row(t("previous_number_type"), result.portability.previous_carrier.type)
     else:
-        table.add_row("可携号转网", "[red]未知[/red]")
-        table.add_row("已携号转网", "[red]未知[/red]")
+        table.add_row(t("portable"), "[red]" + t("unknown") + "[/red]")
+        table.add_row(t("ported"), "[red]" + t("unknown") + "[/red]")
     
     console.print(table)
 
@@ -458,64 +486,77 @@ def display_batch_summary(results: List[LookupResult]) -> None:
     successful = sum(1 for r in results if r.status == "success")
     failed = total - successful
     
-    # 计算运营商分布
-    carrier_counts = {}
+    # 计算携号转网比例
+    ported = sum(1 for r in results if r.status == "success" and r.portability and r.portability.ported)
+    
+    # 统计不同运营商数量
+    carrier_count = {}
     for result in results:
         if result.status == "success":
             carrier_name = result.carrier.name
-            carrier_counts[carrier_name] = carrier_counts.get(carrier_name, 0) + 1
-    
-    # 计算携号转网统计
-    ported_count = sum(1 for r in results if r.status == "success" and r.portability and r.portability.ported)
+            carrier_count[carrier_name] = carrier_count.get(carrier_name, 0) + 1
     
     # 统计错误类型
     error_types = {}
     for result in results:
         if result.status.startswith("error:"):
-            error_message = result.status[6:].strip()
-            # 提取错误类型
-            error_type = "其他错误"
+            error_msg = result.status[6:].strip()
             
-            if "403" in error_message:
-                error_type = "账户权限问题 (403)"
-            elif "401" in error_message:
-                error_type = "API密钥无效 (401)"
-            elif "404" in error_message:
-                error_type = "号码不存在 (404)"
-            elif "429" in error_message:
-                error_type = "请求频率限制 (429)"
-            elif any(code in error_message for code in ["500", "502", "503", "504"]):
-                error_type = "服务器错误 (5xx)"
-            elif "timeout" in error_message.lower():
-                error_type = "请求超时"
-                
+            # 分类错误类型
+            if "403" in error_msg:
+                error_type = t("error_403_short")
+            elif "401" in error_msg:
+                error_type = t("error_401_short")
+            elif "404" in error_msg:
+                error_type = t("error_404_short")
+            elif "429" in error_msg:
+                error_type = t("error_429_short")
+            elif any(code in error_msg for code in ["500", "502", "503", "504"]):
+                error_type = t("error_5xx_short")
+            elif "timeout" in error_msg.lower():
+                error_type = t("error_timeout_short")
+            else:
+                error_type = t("error_unknown_short")
+            
             error_types[error_type] = error_types.get(error_type, 0) + 1
     
-    # 创建摘要表
-    table = Table(title="批量查询摘要", show_header=True, box=box.ROUNDED)
+    # 创建总体摘要表格
+    summary_table = Table(title=t("batch_result_summary"), show_header=True, box=box.ROUNDED)
+    summary_table.add_column(t("summary_item"), style="cyan")
+    summary_table.add_column(t("count"), style="white")
+    summary_table.add_column(t("percentage"), style="green")
     
-    table.add_column("统计项", style="cyan")
-    table.add_column("数值", style="white")
-    table.add_column("百分比", style="green")
-    
-    table.add_row("总号码数", str(total), "100%")
-    table.add_row("成功查询", str(successful), f"{successful/total*100:.1f}%" if total > 0 else "0%")
-    table.add_row("查询失败", str(failed), f"{failed/total*100:.1f}%" if total > 0 else "0%")
+    # 添加摘要行
+    summary_table.add_row(t("total_numbers"), str(total), "100%")
+    summary_table.add_row(
+        t("successful_queries"), 
+        str(successful), 
+        f"{successful/total*100:.1f}%" if total > 0 else "0%"
+    )
+    summary_table.add_row(
+        t("failed_queries"), 
+        str(failed), 
+        f"{failed/total*100:.1f}%" if total > 0 else "0%"
+    )
     
     if successful > 0:
-        table.add_row("已携号转网", str(ported_count), f"{ported_count/successful*100:.1f}%")
+        summary_table.add_row(
+            t("ported_numbers"), 
+            str(ported), 
+            f"{ported/successful*100:.1f}%"
+        )
     
-    console.print(table)
+    console.print(summary_table)
     
     # 显示运营商分布
-    if carrier_counts:
-        carrier_table = Table(title="运营商分布", show_header=True, box=box.ROUNDED)
-        carrier_table.add_column("运营商", style="cyan")
-        carrier_table.add_column("号码数", style="white")
-        carrier_table.add_column("百分比", style="green")
+    if carrier_count:
+        carrier_table = Table(title=t("carrier_distribution"), show_header=True, box=box.ROUNDED)
+        carrier_table.add_column(t("carrier"), style="cyan")
+        carrier_table.add_column(t("count"), style="white")
+        carrier_table.add_column(t("percentage"), style="green")
         
         # 按数量排序
-        sorted_carriers = sorted(carrier_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_carriers = sorted(carrier_count.items(), key=lambda x: x[1], reverse=True)
         
         for carrier, count in sorted_carriers:
             carrier_table.add_row(carrier, str(count), f"{count/successful*100:.1f}%" if successful > 0 else "0%")
@@ -524,10 +565,10 @@ def display_batch_summary(results: List[LookupResult]) -> None:
     
     # 显示错误类型统计
     if error_types:
-        error_table = Table(title="错误类型统计", show_header=True, box=box.ROUNDED)
-        error_table.add_column("错误类型", style="cyan")
-        error_table.add_column("次数", style="white")
-        error_table.add_column("百分比", style="red")
+        error_table = Table(title=t("error_type_stats"), show_header=True, box=box.ROUNDED)
+        error_table.add_column(t("error_type"), style="cyan")
+        error_table.add_column(t("count"), style="white")
+        error_table.add_column(t("percentage"), style="red")
         
         # 按数量排序
         sorted_errors = sorted(error_types.items(), key=lambda x: x[1], reverse=True)

@@ -2,7 +2,7 @@
 
 ## 基于Telnyx LNP的美国电话号码查询工具
 
-### 📞 项目概述：美国电话号码状态查询系统
+### 📞 项目概述：美国电话号码状态查询系统（支持中英文双语界面）
 
 ### 背景与原理
 
@@ -45,7 +45,7 @@ RealCarrier系统采用以下技术路线解决美国电话号码查询需求：
 </p>
 
 <p align="center">
-  <i>轻量级高效的美国电话号码运营商信息查询工具</i>
+  <i>轻量级高效的美国电话号码运营商信息查询工具（支持中英文双语界面）</i>
 </p>
 
 ---
@@ -56,12 +56,27 @@ RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号
 
 | 功能 | 描述 |
 |------|------|
-| 🔑 安全管理API密钥 | 安全存储并管理您的Telnyx API密钥 |
-| 📱 单号查询 | 快速查询单个电话号码的运营商信息 |
+| 🔑 API密钥管理 | 安全存储并管理您的Telnyx API密钥 |
+| 🔍 单号查询 | 快速查询单个电话号码的运营商信息 |
 | 📊 批量查询 | 从CSV文件高效批量查询多个号码 |
-| 💾 本地缓存 | 智能缓存查询结果，减少API调用 |
-| 📄 数据导出 | 将查询结果导出为CSV格式，方便分析 |
-| 🌈 彩色界面 | 精美的彩色命令行界面，优化用户体验 |
+| 💾 缓存管理 | 智能缓存查询结果，减少API调用 |
+| ℹ️ 系统信息 | 查看系统状态和配置信息 |
+| 🌐 语言设置 | 支持中英文双语界面切换 |
+| 🚀 Telnyx指南 | 获取Telnyx账户设置帮助 |
+
+---
+
+## 🌐 语言设置 / Language Settings
+
+程序支持中英文双语界面，您可以在主菜单中选择"语言设置"选项进行切换：
+The program supports both Chinese and English interfaces. You can switch languages by selecting the "Language Settings" option in the main menu:
+
+- 选择选项6进入语言设置 / Select option 6 to enter language settings
+- 选择1切换到中文 / Select 1 to switch to Chinese
+- 选择2切换到英文 / Select 2 to switch to English
+
+语言设置会被保存，下次启动程序时会自动应用上次选择的语言。
+Language preferences will be saved and automatically applied when you restart the program.
 
 ---
 
@@ -135,11 +150,12 @@ python main.py
 运行后，您将看到交互式主菜单，提供以下功能选项：
 ![image](https://github.com/user-attachments/assets/2dc98f73-4470-4d24-a15c-751ad9e377f2)
 
-1. **📱 查询单个电话号码** - 查询单个美国电话号码信息
-2. **📊 批量查询电话号码** - 从CSV文件批量查询多个号码
-3. **⚙️ 配置API密钥** - 设置或更新您的Telnyx API密钥
+1. **🔑 API密钥管理** - 设置或更新您的Telnyx API密钥
+2. **🔍 查询单个电话** - 查询单个美国电话号码信息
+3. **📊 批量查询CSV文件** - 从CSV文件批量查询多个号码
 4. **💾 缓存管理** - 管理本地查询结果缓存
-5. **ℹ️ 系统信息** - 查看系统状态和统计信息
+5. **ℹ️  系统信息** - 查看系统状态和统计信息
+6. **🌐 语言设置** - 切换中英文界面语言
 0. **❌ 退出程序** - 退出应用程序
 
 ### 📝 配置API密钥
@@ -147,21 +163,21 @@ python main.py
 首次使用时，程序会提示您配置Telnyx API密钥：
 ![image](https://github.com/user-attachments/assets/48f4d0ee-1429-43cb-bd0d-ab2ec1b6784d)
 
-1. 从主菜单选择 "**3. ⚙️ 配置API密钥**"
+1. 从主菜单选择 "**1. 🔑 API密钥管理**"
 2. 根据提示输入您的Telnyx API密钥
 3. 密钥将安全存储在本地配置文件中
 
 ### 🔍 查询单个号码
 ![image](https://github.com/user-attachments/assets/cc32a3b4-3d0a-406b-ade5-011b20766e77)
 
-1. 从主菜单选择 "**1. 📱 查询单个电话号码**"
+1. 从主菜单选择 "**2. 🔍 查询单个电话**"
 2. 输入10位美国电话号码（例如：8772427372）
 3. 系统将显示该号码的详细信息，包括运营商、号码类型和携号转网状态
 4. 若您的Telnyx账户异常，包括不限于没有充值、KYC没有验证、API异常都会导致403错误，请先保证Telnyx账户正常
 
 ### 📊 批量查询
 
-1. 从主菜单选择 "**2. 📊 批量查询电话号码**"
+1. 从主菜单选择 "**3. 📊 批量查询CSV文件**"
 2. 输入包含电话号码的CSV文件路径
 3. 指定结果输出文件路径
 4. 系统将批量处理所有号码并生成结果文件
@@ -269,4 +285,5 @@ pytest
 ---
 
 ## 📅 文档信息
-- **最后更新日期**: 2025-03-03
+- **最后更新日期**: 2025-03-04 15:30:00 (Pacific Time)
+- **时间戳**: 1741302600

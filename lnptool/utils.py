@@ -12,8 +12,18 @@ from datetime import datetime, timezone
 
 import click
 from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
 
 console = Console()
+
+try:
+    from lnptool.i18n import t
+except ImportError:
+    # 如果i18n模块尚未创建，提供一个简单的代替函数
+    def t(key):
+        return key
 
 
 def configure_logging(verbose: bool = False) -> None:
@@ -249,7 +259,7 @@ def phone_input(prompt: str = "请输入10位美国电话号码", use_rich: bool
     """
     try:
         # 显示提示信息，明确展示+1已经作为前缀
-        print(f"{prompt} (+1已添加):")
+        print(f"{prompt} ({t('plus_1_added')}):")
         print("+1", end="", flush=True)  # 直接打印+1前缀
         
         # 获取用户输入
@@ -267,7 +277,7 @@ def phone_input(prompt: str = "请输入10位美国电话号码", use_rich: bool
         
         # 确保格式正确
         if len(digits) < 11 or (len(digits) == 11 and not digits.startswith('1')):
-            print_error("号码格式不正确，请在+1后输入10位美国电话号码")
+            print_error(t("incorrect_number_format"))
             return phone_input(prompt)
         
         # 格式化为E.164格式
@@ -280,20 +290,20 @@ def phone_input(prompt: str = "请输入10位美国电话号码", use_rich: bool
         if use_rich:
             from rich.console import Console
             console = Console()
-            console.print(f"您输入的电话号码是: [bold]{formatted_display}[/bold]")
+            console.print(f"{t('phone_you_entered')}: [bold]{formatted_display}[/bold]")
             from rich.prompt import Confirm
-            if Confirm.ask("是否继续?", default=True):
+            if Confirm.ask(t("confirm_continue"), default=True):
                 return formatted
         else:
-            print_info(f"您输入的电话号码是: {formatted_display}")
-            if click.confirm("是否继续?", default=True):
+            print_info(f"{t('phone_you_entered')}: {formatted_display}")
+            if click.confirm(t("confirm_continue"), default=True):
                 return formatted
             
-        print_info("已取消输入，请重新输入")
+        print_info(t("input_cancelled"))
         return phone_input(prompt, use_rich)
             
     except (KeyboardInterrupt, EOFError, click.Abort):
-        print("\n操作已取消")
+        print(f"\n{t('operation_cancelled')}")
         raise
 
 
