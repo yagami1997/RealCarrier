@@ -1,5 +1,5 @@
 # RealCarrier项目依赖
-# 最后更新时间（PST）: 2025-03-04 11:25:00
+# 最后更新时间（PST）: 2025-03-04 11:25:00 [Timestamp: 1741289100]
 
 # 核心依赖
 click==8.1.8        # CLI接口和工具函数
@@ -9,6 +9,11 @@ pandas==2.2.3       # 数据处理和CSV文件操作
 pydantic==2.10.6    # 数据验证和模型定义
 keyring==25.6.0     # 安全存储API密钥
 psutil==5.9.8       # 系统信息收集和显示
+pytz==2024.1        # 时区处理和国际化时间支持
+python-dateutil==2.9.0  # 增强日期时间处理能力
+
+# 国际化支持
+# 注: 应用的双语界面(中文/英文)通过内置翻译字典实现，无需额外的i18n库
 
 # 开发依赖
 pytest==8.3.5       # 单元测试
@@ -18,4 +23,12 @@ mypy==1.15.0        # 类型检查
 coverage==7.6.12    # 测试覆盖率分析
 setuptools==75.8.2  # 打包工具
 
+# 兼容性说明：以上版本适用于Python 3.9+
+# 如需在低版本环境运行，请考虑降级相应依赖版本
+
 # 注：typer依赖已移除，因为代码中使用click而非typer
+
+from update_timestamp import get_pacific_time, get_pacific_timestamp
+
+current_time = get_pacific_time()
+current_timestamp = get_pacific_timestamp()
