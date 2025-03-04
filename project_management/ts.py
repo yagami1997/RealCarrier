@@ -105,24 +105,62 @@ def update_timestamps_in_directory(directory_path):
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(description='更新项目管理文档中的时间戳')
-    parser.add_argument('--dir', type=str, help='指定要更新的目录')
+    parser.add_argument('--dir', help='指定要更新的目录')
     parser.add_argument('--root', action='store_true', help='更新项目根目录的README.md文件')
+    parser.add_argument('--file', help='指定要更新的单个文件')
+    parser.add_argument('--all', action='store_true', help='更新所有重要文件的时间戳')
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = parse_arguments()
     
-    if args.root:
+    if args.all:
+        # 更新所有重要文件
+        important_files = [
+            'README.md',
+            'pyproject.toml',
+            'setup.py',
+            # 添加其他重要文件...
+        ]
+        
+        print("开始更新所有重要文件...")
+        updated_count = 0
+        
+        for file_path in important_files:
+            if os.path.exists(file_path):
+                print(f"正在更新: {file_path}")
+                if update_timestamp_in_file(file_path):
+                    updated_count += 1
+            else:
+                print(f"文件不存在: {file_path}")
+        
+        # 更新项目管理目录
+        if os.path.exists('project_management'):
+            print("更新项目管理目录中的文件...")
+            update_timestamps_in_directory('project_management')
+        
+        print(f"\n共更新了 {updated_count} 个重要文件")
+    elif args.root:
         # 更新项目根目录的README.md文件
-        root_readme = 'README.md'
-        if os.path.exists(root_readme):
-            print(f"更新项目根目录README.md文件...")
-            if update_timestamp_in_file(root_readme):
+        readme_path = 'README.md'
+        if os.path.exists(readme_path):
+            print("开始更新项目根目录README.md文件...")
+            if update_timestamp_in_file(readme_path):
                 print("项目README.md文件已更新")
             else:
                 print("项目README.md文件无需更新")
         else:
             print(f"项目根目录README.md文件不存在")
+    elif args.file:
+        # 更新指定的单个文件
+        if os.path.exists(args.file):
+            print(f"开始更新文件: {args.file}")
+            if update_timestamp_in_file(args.file):
+                print(f"文件 {args.file} 已更新")
+            else:
+                print(f"文件 {args.file} 无需更新")
+        else:
+            print(f"文件不存在: {args.file}")
     elif args.dir:
         print(f"开始更新指定目录: {args.dir}")
         update_timestamps_in_directory(args.dir)
