@@ -55,9 +55,13 @@ def update_timestamp_in_file(file_path):
         # 时间戳格式: timestamp: 1234567890
         (r'timestamp: \d+', f'timestamp: {timestamp}'),
         
-        # README.md 特定格式
+        # README.md 中文版特定格式
         (r'- \*\*最后更新日期\*\*: .*', f'- **最后更新日期**: {pacific_time} (Pacific Time)'),
         (r'- \*\*时间戳\*\*: \d+', f'- **时间戳**: {timestamp}'),
+        
+        # README.md 英文版特定格式
+        (r'- \*\*Last Updated\*\*: .*', f'- **Last Updated**: {pacific_time} (Pacific Time)'),
+        (r'- \*\*Timestamp\*\*: \d+', f'- **Timestamp**: {timestamp}'),
         
         # pyproject.toml 特定格式
         (r'# 最后更新时间（PST）: .*', f'# 最后更新时间（PST）: {pacific_time}'),
