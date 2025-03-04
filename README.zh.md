@@ -1,7 +1,7 @@
 <h1 align="center">🌟 RealCarrier Alpha 🌟</h1>
 
 <p align="center">
-  <a href="README.md">English</a> | <a href="README.zh.md">中文</a>
+  <a href="README.md">English Version</a> | <a href="README.zh.md">中文版</a>
 </p>
 
 ## 基于Telnyx LNP的美国电话号码查询工具
@@ -290,5 +290,5 @@ pytest
 ---
 
 ## 📅 文档信息
-- **最后更新日期**: 2025-03-04 00:47:21 (Pacific Time)
-- **时间戳**: 1741078041
+- **最后更新日期**: 2025-03-04 04:25:18 (Pacific Time)
+- **时间戳**: 1741091118

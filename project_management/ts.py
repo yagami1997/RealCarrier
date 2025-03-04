@@ -118,6 +118,7 @@ if __name__ == '__main__':
         # 更新所有重要文件
         important_files = [
             'README.md',
+            'README.zh.md',
             'pyproject.toml',
             'setup.py',
             # 添加其他重要文件...
