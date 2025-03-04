@@ -412,7 +412,7 @@ def display_lookup_result(result: LookupResult) -> None:
         formatted_phone = phone_e164  # 如果不是标准格式，则保持原样
     
     # 创建表格
-    title = f"{t('phone_number')} {formatted_phone} {t('query_result_title')}"
+    title = f"{t('phone_number')} {formatted_phone}"
     table = Table(title=title, show_header=False, box=box.ROUNDED, expand=True)
     table.add_column(t("field"), style="cyan")
     table.add_column(t("value"), style="white")
