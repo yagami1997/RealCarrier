@@ -149,7 +149,7 @@ python main.py
 ```
 
 运行后，您将看到交互式主菜单，提供以下功能选项：
-![image](https://github.com/user-attachments/assets/c49c5a57-3662-4a2c-8a1c-7111bfbab5f4)
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/aff0fd2e-5bea-4353-a07e-6ce4c8f88cc9" />
 
 1. **🔑 API密钥管理** - 设置或更新您的Telnyx API密钥
 2. **🔍 查询单个电话** - 查询单个美国电话号码信息
@@ -169,7 +169,7 @@ python main.py
 3. 密钥将安全存储在本地配置文件中
 
 ### 🔍 查询单个号码
-![image](https://github.com/user-attachments/assets/cc32a3b4-3d0a-406b-ade5-011b20766e77)
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/e2041685-9c12-4d09-a84e-5c312a8baff8" />
 
 1. 从主菜单选择 "**2. 🔍 查询单个电话**"
 2. 输入10位美国电话号码（例如：8772427372）
@@ -177,8 +177,8 @@ python main.py
 4. 若您的Telnyx账户异常，包括不限于没有充值、KYC没有验证、API异常都会导致403错误，请先保证Telnyx账户正常
 
 ### 📊 批量查询
-![image](https://github.com/user-attachments/assets/f4af0e91-4871-4713-a80d-c836f8509a5c)
-![image](https://github.com/user-attachments/assets/503b8e64-6cf9-4719-bb1a-c545a8fa87fe)
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/ed9cdc2b-8cf0-4037-a66a-16a57df067d1" />
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/3f29dd78-5098-43bc-99cf-342035650fad" />
 
 1. 从主菜单选择 "**3. 📊 批量查询CSV文件**"
 2. 输入包含电话号码的CSV文件路径
@@ -186,6 +186,7 @@ python main.py
 4. 系统将批量处理所有号码并生成结果文件
 
 ### 🧹 管理缓存
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/a8c4140b-55a1-47d8-a89e-0ce4ca6cc91a" />
 
 1. 从主菜单选择 "**4. 💾 缓存管理**"
 
