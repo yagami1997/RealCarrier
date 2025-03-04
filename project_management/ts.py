@@ -63,8 +63,42 @@ def update_timestamp_in_file(file_path):
             r'# 最后更新时间（.*）: .*',
             r'\*报告日期：.*\*',
             r'- \*\*日期\*\*: \d{4}(-\d{2}){2}',
-            r'- \*\*时间段\*\*: .* 至 .*'
+            r'- \*\*时间段\*\*: .* 至 .*',
+            
+            # README.md中的时间格式
+            r'- \*\*最后更新日期\*\*: .*',
+            r'- \*\*时间戳\*\*: \d+'
         ]
+        
+        # 特殊处理README.md中的时间戳格式
+        if file_path.endswith('README.md'):
+            # 更新最后更新日期
+            date_pattern = r'- \*\*最后更新日期\*\*: .*'
+            date_match = re.search(date_pattern, content)
+            if date_match:
+                pacific_time_formatted = f"{current_time} (Pacific Time)"
+                updated_content = re.sub(
+                    date_pattern,
+                    f"- **最后更新日期**: {pacific_time_formatted}",
+                    updated_content
+                )
+            
+            # 更新时间戳
+            timestamp_pattern = r'- \*\*时间戳\*\*: \d+'
+            timestamp_match = re.search(timestamp_pattern, content)
+            if timestamp_match:
+                updated_content = re.sub(
+                    timestamp_pattern,
+                    f"- **时间戳**: {current_timestamp}",
+                    updated_content
+                )
+            
+            # 检查是否有更新
+            if updated_content != content:
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(updated_content)
+                return True
+            return False
         
         for pattern in patterns:
             match = re.search(pattern, content)
