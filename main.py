@@ -546,17 +546,17 @@ def clear_screen():
 def show_logo():
     """显示程序标志"""
     # 创建主标题面板
-    title_text = "RealCarrier - "
+    title_text = ""
     if get_current_language() == "zh_CN":
-        title_text += "美国电话号码状态查询器"
+        title_text = "美国电话号码状态查询器"
     else:
-        title_text += "US Phone Number Status Lookup Tool"
+        title_text = "US Phone Number Status Lookup Tool"
         
     console.print(Panel.fit(
         f"[bold blue]RealCarrier[/bold blue] - [cyan]{title_text}[/cyan]",
-        border_style="green",
+        border_style="blue",
         padding=(1, 2),
-        title="v0.1.0",
+        title="Alpha v0.1.0",
         subtitle="by Yagami1997"
     ))
     console.print()
@@ -778,6 +778,7 @@ def telnyx_account_guide():
 def lookup_number():
     """查询单个电话号码"""
     clear_screen()
+    show_logo()
     console.print(f"\n{t('single_lookup_title')}\n")
     
     # 简化提示，删除颜色标记，并确保+1后有空格
