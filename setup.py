@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-# 最后更新时间（PST）: 2023-12-06 15:34:05
+# 最后更新时间（PST）: 2025-03-04 00:47:21
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
