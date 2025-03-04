@@ -69,7 +69,8 @@ RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号
 ## 🌐 语言设置 / Language Settings
 
 程序支持中英文双语界面，您可以在主菜单中选择"语言设置"选项进行切换：
-The program supports both Chinese and English interfaces. You can switch languages by selecting the "Language Settings" option in the main menu:
+The program supports both Chinese and English interfaces. 
+You can switch languages by selecting the "Language Settings" option in the main menu:
 
 - 选择选项6进入语言设置 / Select option 6 to enter language settings
 - 选择1切换到中文 / Select 1 to switch to Chinese
