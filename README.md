@@ -148,7 +148,7 @@ python main.py
 ```
 
 运行后，您将看到交互式主菜单，提供以下功能选项：
-![image](https://github.com/user-attachments/assets/2dc98f73-4470-4d24-a15c-751ad9e377f2)
+![image](https://github.com/user-attachments/assets/c49c5a57-3662-4a2c-8a1c-7111bfbab5f4)
 
 1. **🔑 API密钥管理** - 设置或更新您的Telnyx API密钥
 2. **🔍 查询单个电话** - 查询单个美国电话号码信息
@@ -176,6 +176,8 @@ python main.py
 4. 若您的Telnyx账户异常，包括不限于没有充值、KYC没有验证、API异常都会导致403错误，请先保证Telnyx账户正常
 
 ### 📊 批量查询
+![image](https://github.com/user-attachments/assets/f4af0e91-4871-4713-a80d-c836f8509a5c)
+![image](https://github.com/user-attachments/assets/503b8e64-6cf9-4719-bb1a-c545a8fa87fe)
 
 1. 从主菜单选择 "**3. 📊 批量查询CSV文件**"
 2. 输入包含电话号码的CSV文件路径
