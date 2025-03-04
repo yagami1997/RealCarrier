@@ -1,7 +1,7 @@
 <h1 align="center">🌟 RealCarrier Alpha 🌟</h1>
 
 <p align="center">
-  <a href="README.md">English</a> | <a href="README.zh.md">中文</a>
+  <a href="README.md">English Version</a> | <a href="README.zh.md">中文版</a>
 </p>
 
 ## US Phone Number Query Tool Based on Telnyx LNP
