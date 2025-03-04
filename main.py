@@ -527,6 +527,16 @@ def show_main_menu():
     """显示主菜单"""
     console.print(f"\n[bold cyan]RealCarrier Alpha[/bold cyan] - {t('app_title')}\n")
     
+    # 显示API状态
+    api_status, masked_key = check_api_key_status()
+    console.print(f"{t('api_status')}: {api_status}")
+    
+    # 显示仓库地址
+    console.print(f"{t('github_link')}: [link=https://github.com/yagami1997/realcarrier]https://github.com/yagami1997/realcarrier[/link]")
+    
+    # 添加Telnyx API支持说明
+    console.print(f"本工具由Telnyx提供API支持: [link=https://telnyx.com]https://telnyx.com[/link]\n")
+    
     # 创建带有表情符号的菜单表格
     table = Table(show_header=False, box=box.ROUNDED)
     table.add_column(t("option"), style="cyan")
@@ -541,7 +551,6 @@ def show_main_menu():
     table.add_row("[0]", t("menu_option_0"))
     
     console.print(table)
-    console.print(f"{t('select_option')} [0-6]: ", end="")
 
 def check_api_key_status():
     """检查API密钥状态"""
