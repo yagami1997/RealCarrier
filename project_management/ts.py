@@ -6,8 +6,9 @@ RealCarrier项目文档时间戳更新工具
 用于将项目管理文档中的时间戳更新为统一的太平洋时间格式
 
 使用方法:
-1. 直接运行此脚本: python update_timestamps.py
-2. 指定目录更新: python update_timestamps.py --dir project_management/templates
+1. 直接运行此脚本: python ts.py
+2. 指定目录更新: python ts.py --dir project_management/templates
+3. 更新项目根目录README: python ts.py --root
 """
 
 import os
@@ -129,12 +130,24 @@ def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(description='更新项目管理文档中的时间戳')
     parser.add_argument('--dir', type=str, help='指定要更新的目录')
+    parser.add_argument('--root', action='store_true', help='更新项目根目录的README.md文件')
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = parse_arguments()
     
-    if args.dir:
+    if args.root:
+        # 更新项目根目录的README.md文件
+        root_readme = 'README.md'
+        if os.path.exists(root_readme):
+            print(f"更新项目根目录README.md文件...")
+            if update_timestamp_in_file(root_readme):
+                print("项目README.md文件已更新")
+            else:
+                print("项目README.md文件无需更新")
+        else:
+            print(f"项目根目录README.md文件不存在")
+    elif args.dir:
         print(f"开始更新指定目录: {args.dir}")
         update_timestamps_in_directory(args.dir)
     else:
