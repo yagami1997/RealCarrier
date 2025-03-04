@@ -1,7 +1,7 @@
 <h1 align="center">🌟 RealCarrier Alpha 🌟</h1>
 
 <p align="center">
-  <a href="#english">English</a> | <a href="#chinese">中文</a>
+  <a href="#english">English Version</a> | <a href="#chinese">中文版</a>
 </p>
 
 <a id="english"></a>
