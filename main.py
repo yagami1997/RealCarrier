@@ -270,6 +270,25 @@ TRANSLATIONS = {
         "get_api_key": "获取API密钥",
         "verify_account_kyc": "完成账户验证（KYC）",
         "enable_lnp_service": "开通LNP查询服务",
+        
+        # 需要添加的缺失翻译
+        "add_modify_key": "添加或修改API密钥",
+        "enter_api_key": "请输入API密钥",
+        "key_input": "您输入的密钥",
+        "key_format_warning": "密钥格式可能不正确，通常应为长字符串",
+        "still_save": "是否仍然保存?",
+        "confirm_save": "确认保存密钥?",
+        "key_saved": "密钥已保存",
+        "verifying_key": "正在验证密钥...",
+        "key_verified": "密钥验证成功",
+        "key_verify_failed": "密钥验证失败",
+        "delete_key_title": "删除API密钥",
+        "delete_warning": "警告：删除API密钥将导致无法使用查询功能",
+        "confirm_delete": "确认删除密钥?",
+        "final_confirm": "最终确认",
+        "confirm_delete_again": "再次确认删除密钥?",
+        "key_deleted": "密钥已删除",
+        "delete_failed": "删除失败",
     },
     "en_US": {
         # Main Menu
@@ -495,6 +514,25 @@ TRANSLATIONS = {
         "get_api_key": "Get API Key",
         "verify_account_kyc": "Complete Account Verification (KYC)",
         "enable_lnp_service": "Enable LNP Lookup Service",
+        
+        # 确保英文版也有这些键
+        "add_modify_key": "Add or Modify API Key",
+        "enter_api_key": "Enter API Key",
+        "key_input": "Key input",
+        "key_format_warning": "Key format may be incorrect, it should be a long string",
+        "still_save": "Save anyway?",
+        "confirm_save": "Confirm save key?",
+        "key_saved": "Key saved",
+        "verifying_key": "Verifying key...",
+        "key_verified": "Key verified successfully",
+        "key_verify_failed": "Key verification failed",
+        "delete_key_title": "Delete API Key",
+        "delete_warning": "Warning: Deleting API key will disable query functionality",
+        "confirm_delete": "Confirm delete key?",
+        "final_confirm": "Final Confirmation",
+        "confirm_delete_again": "Confirm delete key again?",
+        "key_deleted": "Key deleted",
+        "delete_failed": "Delete failed",
     }
 }
 
