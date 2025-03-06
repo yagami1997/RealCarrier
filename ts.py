@@ -12,6 +12,7 @@ import time
 import glob
 import argparse
 from datetime import datetime
+import pytz
 
 # 时间戳格式
 TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -25,14 +26,18 @@ def update_timestamp(file_path):
         
         # 获取当前时间戳
         now = int(time.time())
-        now_str = datetime.fromtimestamp(now).strftime(TIMESTAMP_FORMAT)
+        
+        # 获取太平洋时间
+        pst = pytz.timezone('America/Los_Angeles')
+        pst_time = datetime.fromtimestamp(now, pst)
+        pst_str = pst_time.strftime(TIMESTAMP_FORMAT)
         
         # 查找并替换时间戳
         if "最后更新时间" in content:
             # 更新最后更新时间
             content = re.sub(
                 r"最后更新时间（\w+）: .*?\[Timestamp: \d+\]", 
-                f"最后更新时间（PST）: {now_str} [Timestamp: {now}]", 
+                f"最后更新时间（PST）: {pst_str} [Timestamp: {now}]", 
                 content
             )
         
