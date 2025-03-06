@@ -1,5 +1,6 @@
 """
 LNP Tool - 美国电话号码携号转网查询工具
+支持多API接口 (Telnyx & Twilio)
 """
 
 import logging
@@ -60,4 +61,4 @@ def setup_logging(log_level=logging.INFO):
 # 所有重要信息都会通过rich表格展示
 logger = setup_logging(logging.WARNING)
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"

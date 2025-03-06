@@ -15,6 +15,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+from rich.prompt import Prompt, Confirm
 
 console = Console()
 
@@ -246,65 +247,114 @@ def safe_input(prompt: str, password: bool = False) -> str:
         sys.exit(1)
 
 
-def phone_input(prompt: str = "请输入10位美国电话号码", use_rich: bool = False) -> str:
+def format_phone_number(phone_digits: str) -> str:
     """
-    专门用于电话号码输入，实现预填+1的效果
+    将10位电话号码格式化为(XXX) XXX-XXXX格式
     
     Args:
-        prompt: 提示消息
-        use_rich: 是否使用Rich UI库
+        phone_digits: 10位电话号码数字
         
     Returns:
-        str: 格式化后的电话号码（E.164格式）
+        str: 格式化后的电话号码
     """
-    try:
-        # 显示提示信息，明确展示+1已经作为前缀
-        print(f"{prompt} ({t('plus_1_added')}):")
-        print("+1", end="", flush=True)  # 直接打印+1前缀
+    if len(phone_digits) == 10:
+        return f"({phone_digits[:3]}) {phone_digits[3:6]}-{phone_digits[6:]}"
+    else:
+        return phone_digits  # 如果不是10位，则返回原始数字
+
+
+def phone_input(prompt_text: str, use_rich: bool = True) -> str:
+    """
+    获取用户输入的电话号码，并进行格式化
+    
+    Args:
+        prompt_text: 提示文本
+        use_rich: 是否使用Rich库进行格式化输出
         
+    Returns:
+        str: 格式化后的电话号码，如果用户取消则返回空字符串
+    """
+    from lnptool.i18n import t
+    
+    while True:
         # 获取用户输入
-        user_input = input()
-        phone = "+1" + user_input
-        
-        # 处理用户可能自己输入了完整号码的情况
-        if user_input.startswith("+1"):
-            phone = user_input
-        if user_input.startswith("1") and len(user_input) >= 11:
-            phone = "+1" + user_input[1:]
-            
-        # 提取所有数字
-        digits = ''.join(c for c in phone if c.isdigit())
-        
-        # 确保格式正确
-        if len(digits) < 11 or (len(digits) == 11 and not digits.startswith('1')):
-            print_error(t("incorrect_number_format"))
-            return phone_input(prompt)
-        
-        # 格式化为E.164格式
-        formatted = f"+1{digits[-10:]}"
-            
-        # 显示美式格式进行确认
-        last_ten = formatted[-10:]
-        formatted_display = f"({last_ten[:3]}){last_ten[3:6]}-{last_ten[6:]}"
-        
         if use_rich:
-            from rich.console import Console
-            console = Console()
-            console.print(f"{t('phone_you_entered')}: [bold]{formatted_display}[/bold]")
-            from rich.prompt import Confirm
-            if Confirm.ask(t("confirm_continue"), default=True):
-                return formatted
+            phone = Prompt.ask(prompt_text)
         else:
-            print_info(f"{t('phone_you_entered')}: {formatted_display}")
-            if click.confirm(t("confirm_continue"), default=True):
-                return formatted
+            print(prompt_text)
+            phone = input("> ")
+        
+        # 如果用户输入为空，视为取消
+        if not phone:
+            print_info(t("operation_cancelled"))
+            return ""
+        
+        # 移除所有非数字字符
+        phone_digits = re.sub(r'\D', '', phone)
+        
+        # 检查是否是美国号码
+        if len(phone_digits) == 10:
+            # 添加美国国家代码（用于API查询）
+            formatted_phone = f"+1{phone_digits}"
+            # 创建显示用的格式化电话号码
+            display_phone = format_phone_number(phone_digits)
             
-        print_info(t("input_cancelled"))
-        return phone_input(prompt, use_rich)
+            if use_rich:
+                console.print(f"{t('plus_1_added')}: [bold]{display_phone}[/bold]")
+            else:
+                print(f"{t('plus_1_added')}: {display_phone}")
             
-    except (KeyboardInterrupt, EOFError, click.Abort):
-        print(f"\n{t('operation_cancelled')}")
-        raise
+            # 确认号码
+            if use_rich:
+                ui = __import__('lnptool.ui', fromlist=['UI']).UI
+                ui.show_phone_confirmation(display_phone)
+                if Confirm.ask(f"{t('confirm_continue')}"):
+                    return formatted_phone
+                else:
+                    print_info(t("input_cancelled"))
+            else:
+                print(f"{t('phone_you_entered')}: {display_phone}")
+                confirm = input(f"{t('confirm_continue')} (y/n): ").lower()
+                if confirm in ['y', 'yes']:
+                    return formatted_phone
+                else:
+                    print_info(t("input_cancelled"))
+        
+        # 检查是否已经包含国家代码
+        elif len(phone_digits) == 11 and phone_digits.startswith('1'):
+            formatted_phone = f"+{phone_digits}"
+            if use_rich:
+                if Confirm.ask(f"{t('phone_you_entered')}: {formatted_phone}. {t('confirm_continue')}"):
+                    return formatted_phone
+                else:
+                    print_info(t("input_cancelled"))
+            else:
+                print(f"{t('phone_you_entered')}: {formatted_phone}")
+                confirm = input(f"{t('confirm_continue')} (y/n): ").lower()
+                if confirm in ['y', 'yes']:
+                    return formatted_phone
+                else:
+                    print_info(t("input_cancelled"))
+        
+        # 检查是否已经是完整的国际格式
+        elif phone.startswith('+1') and len(phone_digits) == 11:
+            formatted_phone = f"+{phone_digits}"
+            if use_rich:
+                if Confirm.ask(f"{t('phone_you_entered')}: {formatted_phone}. {t('confirm_continue')}"):
+                    return formatted_phone
+                else:
+                    print_info(t("input_cancelled"))
+            else:
+                print(f"{t('phone_you_entered')}: {formatted_phone}")
+                confirm = input(f"{t('confirm_continue')} (y/n): ").lower()
+                if confirm in ['y', 'yes']:
+                    return formatted_phone
+                else:
+                    print_info(t("input_cancelled"))
+        
+        # 格式不正确
+        else:
+            print_warning(t("incorrect_number_format"))
 
 
 def retry_on_error(func: Callable, *args: Any, retries: int = 3, delay: float = 1.0, **kwargs: Any) -> Any:
@@ -339,3 +389,10 @@ def retry_on_error(func: Callable, *args: Any, retries: int = 3, delay: float = 
             else:
                 print_error(f"操作在重试{retries}次后仍然失败: {str(e)}")
                 raise last_exception
+
+
+def clear_screen() -> None:
+    """
+    清除终端屏幕
+    """
+    os.system('cls' if os.name == 'nt' else 'clear')

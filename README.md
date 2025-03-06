@@ -43,7 +43,7 @@ The RealCarrier system adopts the following technical approach to address US pho
 This system not only provides basic number query functionality but also addresses common industry challenges such as API rate limiting, data freshness, and large-scale processing.
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.1.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/Language-Python-green" alt="Language">
   <img src="https://img.shields.io/badge/License-GPL%203.0-yellow" alt="License">
 </p>
@@ -291,5 +291,5 @@ As free software, you can redistribute and/or modify this program under the term
 ---
 
 ## 📅 Document Information
-- **Last Updated**: 2025-03-04 04:30:46 (Pacific Time)
-- **Timestamp**: 1741091446
+- **Last Updated**: 2025-03-05 21:31:39 (Pacific Time)
+- **Timestamp**: 1741239099

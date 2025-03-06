@@ -1,16 +1,16 @@
 from setuptools import setup, find_packages
 
-# 最后更新时间（PST）: 2025-03-04 04:30:46
+# 最后更新时间（PST）: 2025-03-05 21:31:39
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="realcarrier",
-    version="0.1.0",
+    version="1.0.0",
     author="Your Name",
     author_email="your.email@example.com",
-    description="Telnyx LNP查询工具 - 查询美国电话号码的运营商信息和携号转网状态",
+    description="美国电话号码查询工具 - 支持多API接口 (Telnyx & Twilio)",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/realcarrier",
@@ -22,7 +22,7 @@ setup(
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Telecommunications Industry",
         "Topic :: Communications :: Telephony",
     ],
