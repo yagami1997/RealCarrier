@@ -14,6 +14,8 @@ from keyring.errors import KeyringError
 APP_NAME = "realcarrier"
 CONFIG_DIR = Path.home() / ".lnptool"
 CONFIG_FILE = CONFIG_DIR / "config.json"
+CACHE_DIR = CONFIG_DIR / "cache"
+LAST_PROVIDER_FILE = CONFIG_DIR / "last_provider.txt"
 KEYRING_SERVICE = "realcarrier-telnyx-api"
 KEYRING_USERNAME = "telnyx-api-key"
 
@@ -28,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 def ensure_config_dir() -> None:
     """确保配置目录存在"""
-    if not CONFIG_DIR.exists():
-        CONFIG_DIR.mkdir(parents=True, mode=0o700)  # 只有用户有权限访问
-        logger.info(f"Created configuration directory: {CONFIG_DIR}")
+    CONFIG_DIR.mkdir(exist_ok=True)
+    CACHE_DIR.mkdir(exist_ok=True)
+    logger.info(f"Created configuration directory: {CONFIG_DIR}")
 
 
 def get_config() -> Dict[str, Any]:
@@ -157,3 +159,28 @@ def is_configured() -> bool:
         bool: 如果API密钥已设置，返回True，否则返回False
     """
     return get_api_key() is not None
+
+
+def save_last_used_provider(provider_id):
+    """保存上次使用的API提供商ID"""
+    try:
+        ensure_config_dir()
+        with open(LAST_PROVIDER_FILE, 'w') as f:
+            f.write(provider_id)
+        return True
+    except Exception as e:
+        logger.error(f"保存上次使用的API提供商失败: {e}")
+        return False
+
+
+def get_last_used_provider():
+    """获取上次使用的API提供商ID，如果不存在则返回默认值'telnyx'"""
+    try:
+        if LAST_PROVIDER_FILE.exists():
+            with open(LAST_PROVIDER_FILE, 'r') as f:
+                provider_id = f.read().strip()
+                return provider_id if provider_id in ['telnyx', 'twilio'] else 'telnyx'
+        return 'telnyx'  # 默认使用telnyx
+    except Exception as e:
+        logger.error(f"读取上次使用的API提供商失败: {e}")
+        return 'telnyx'  # 出错时默认使用telnyx

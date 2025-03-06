@@ -1,10 +1,10 @@
-<h1 align="center">🌟 RealCarrier Alpha 🌟</h1>
+<h1 align="center">🌟 RealCarrier Beta v1.0.0 🌟</h1>
 
 <p align="center">
   <a href="README.md">English Version</a> | <a href="README.zh.md">中文版</a>
 </p>
 
-## 基于Telnyx LNP的美国电话号码查询工具
+## 美国电话号码运营商查询工具
 
 ### 📞 项目概述：美国电话号码状态查询系统（支持中英文双语界面）
 
@@ -30,11 +30,21 @@
 3. **OCN (Operating Company Number) 数据库**：识别运营商身份
 4. **NANPA (North American Numbering Plan Administration)**：管理北美号码分配
 
+### API供应商
+
+RealCarrier支持两家领先的电信API供应商：
+
+#### Telnyx
+Telnyx是一家全球通信平台，提供直接访问NPAC数据库的能力，能够提供最准确的号码携带信息和运营商数据。Telnyx的LNP API是本工具的核心数据来源之一。
+
+#### Twilio
+Twilio是全球领先的通信API提供商，其Lookup API提供电话号码验证和运营商信息查询服务。Twilio的API覆盖范围广，提供了丰富的号码元数据。
+
 ### 技术路线
 
 RealCarrier系统采用以下技术路线解决美国电话号码查询需求：
 
-1. **API集成**：与Telnyx LNP API集成，Telnyx拥有NPAC数据库的直接访问权，提供最准确的号码携带信息
+1. **双API集成**：同时集成Telnyx和Twilio API，用户可根据需求选择最适合的供应商
 2. **多级缓存**：实现基于SQLite的持久化缓存和内存缓存，减少API调用成本
 3. **并行处理**：采用异步并行技术处理批量查询，同时实现智能限流
 4. **命令行界面**：基于Rich库构建现代化、用户友好的CLI界面
@@ -43,7 +53,7 @@ RealCarrier系统采用以下技术路线解决美国电话号码查询需求：
 该系统不仅提供了号码查询的基本功能，还解决了行业内常见的API限流、数据新鲜度和大规模处理等挑战。
 
 <p align="center">
-  <img src="https://img.shields.io/badge/版本-0.1.0-blue" alt="版本">
+  <img src="https://img.shields.io/badge/版本-Beta%20v1.0.0-blue" alt="版本">
   <img src="https://img.shields.io/badge/语言-Python-green" alt="语言">
   <img src="https://img.shields.io/badge/许可证-GPL%203.0-yellow" alt="许可证">
 </p>
@@ -56,17 +66,17 @@ RealCarrier系统采用以下技术路线解决美国电话号码查询需求：
 
 ## 📋 功能概览
 
-RealCarrier Alpha是一个轻量级命令行工具，用于查询美国电话号码的运营商信息和携号转网(LNP)状态。该工具基于Telnyx API，提供单个号码查询和批量查询功能。
+RealCarrier Beta是一个轻量级命令行工具，用于查询美国电话号码的运营商信息和携号转网(LNP)状态。该工具支持Telnyx和Twilio双API供应商，提供单个号码查询和批量查询功能。
 
 | 功能 | 描述 |
 |------|------|
-| 🔑 API密钥管理 | 安全存储并管理您的Telnyx API密钥 |
+| 🔑 API密钥管理 | 安全存储并管理您的Telnyx和Twilio API密钥 |
 | 🔍 单号查询 | 快速查询单个电话号码的运营商信息 |
 | 📊 批量查询 | 从CSV文件高效批量查询多个号码 |
 | 💾 缓存管理 | 智能缓存查询结果，减少API调用 |
 | ℹ️ 系统信息 | 查看系统状态和配置信息 |
 | 🌐 语言设置 | 支持中英文双语界面切换 |
-| 🚀 Telnyx指南 | 获取Telnyx账户设置帮助 |
+| 🚀 API供应商设置 | 选择和切换API供应商(Telnyx/Twilio) |
 
 ---
 
@@ -152,22 +162,24 @@ python main.py
 运行后，您将看到交互式主菜单，提供以下功能选项：
 <img width="1114" alt="image" src="https://github.com/user-attachments/assets/aff0fd2e-5bea-4353-a07e-6ce4c8f88cc9" />
 
-1. **🔑 API密钥管理** - 设置或更新您的Telnyx API密钥
+1. **🔑 API密钥管理** - 设置或更新您的Telnyx和Twilio API密钥，并选择活跃供应商
 2. **🔍 查询单个电话** - 查询单个美国电话号码信息
 3. **📊 批量查询CSV文件** - 从CSV文件批量查询多个号码
 4. **💾 缓存管理** - 管理本地查询结果缓存
 5. **ℹ️  系统信息** - 查看系统状态和统计信息
 6. **🌐 语言设置** - 切换中英文界面语言
+7. **🔄 供应商设置** - 选择和切换API供应商
 0. **❌ 退出程序** - 退出应用程序
 
 ### 📝 配置API密钥
 
-首次使用时，程序会提示您配置Telnyx API密钥：
+首次使用时，程序会提示您配置API密钥：
 ![image](https://github.com/user-attachments/assets/48f4d0ee-1429-43cb-bd0d-ab2ec1b6784d)
 
 1. 从主菜单选择 "**1. 🔑 API密钥管理**"
-2. 根据提示输入您的Telnyx API密钥
-3. 密钥将安全存储在本地配置文件中
+2. 选择要配置的API供应商(Telnyx或Twilio)
+3. 根据提示输入相应的API密钥
+4. 密钥将安全存储在本地配置文件中
 
 ### 🔍 查询单个号码
 <img width="1114" alt="image" src="https://github.com/user-attachments/assets/e2041685-9c12-4d09-a84e-5c312a8baff8" />
@@ -175,7 +187,7 @@ python main.py
 1. 从主菜单选择 "**2. 🔍 查询单个电话**"
 2. 输入10位美国电话号码（例如：8772427372）
 3. 系统将显示该号码的详细信息，包括运营商、号码类型和携号转网状态
-4. 若您的Telnyx账户异常，包括不限于没有充值、KYC没有验证、API异常都会导致403错误，请先保证Telnyx账户正常
+4. 若您的API账户异常，包括不限于没有充值、身份验证未完成、API异常都会导致查询失败，请先保证账户正常
 
 ### 📊 批量查询
 <img width="1114" alt="image" src="https://github.com/user-attachments/assets/ed9cdc2b-8cf0-4037-a66a-16a57df067d1" />
@@ -283,12 +295,25 @@ pytest
 
 ## ⚠️ 免责声明
 
-- 本工具使用Telnyx API，可能会产生API调用费用。使用前请了解Telnyx的计费政策。
-- **特别提示**：Telnyx需要完成KYC和充值才能正常使用，遇到API调用失败多数都是这个原因，Telnyx会通过邮件通知账户欠费被停用。
+- 本工具使用Telnyx和Twilio API，可能会产生API调用费用。使用前请了解相关的计费政策。
+- **特别提示**：
+  - **Telnyx**需要完成KYC和充值才能正常使用，遇到API调用失败多数都是这个原因，Telnyx会通过邮件通知账户欠费被停用。
+  - **Twilio**同样需要完成身份验证和账户充值才能使用API服务。
 - **免责声明**：本项目开发者对任何基于本代码的二次开发、商业化应用或其他形式的分享和使用不承担任何法律责任。使用本代码进行二次开发或商业应用需自行评估相关风险并遵守相关法律法规，包括但不限于数据隐私、电信法规和知识产权等方面的规定。
 
 ---
 
+## 📋 更新日志
+
+### Beta v1.0.0 (2025-03-06 12:30:00 PST)
+- 程序完成重构，现在支持双供应商API：Telnyx和Twilio
+- 用户可以根据需要选择使用其中一个或两个供应商
+- 添加了供应商切换功能，可在主菜单中轻松切换
+- 优化了系统信息显示，更准确地显示操作系统和处理器信息
+- 改进了错误处理和国际化支持
+
+---
+
 ## 📅 文档信息
-- **最后更新日期**: 2025-03-04 04:30:46 (Pacific Time)
-- **时间戳**: 1741091446
+- **最后更新日期**: 2025-03-06 12:30:00 (Pacific Time)
+- **时间戳**: 1741264200
