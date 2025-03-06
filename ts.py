@@ -32,12 +32,41 @@ def update_timestamp(file_path):
         pst_time = datetime.fromtimestamp(now, pst)
         pst_str = pst_time.strftime(TIMESTAMP_FORMAT)
         
-        # 查找并替换时间戳
+        # 查找并替换中文时间戳（最后更新时间）
         if "最后更新时间" in content:
-            # 更新最后更新时间
             content = re.sub(
                 r"最后更新时间（\w+）: .*?\[Timestamp: \d+\]", 
                 f"最后更新时间（PST）: {pst_str} [Timestamp: {now}]", 
+                content
+            )
+        
+        # 查找并替换中文时间戳（最后更新）
+        if "最后更新" in content and "最后更新时间" not in content:
+            content = re.sub(
+                r"最后更新\S*: .*?\(Pacific Time\)", 
+                f"最后更新**: {pst_str} (Pacific Time)", 
+                content
+            )
+            
+            # 更新时间戳
+            content = re.sub(
+                r"时间戳\S*: \d+", 
+                f"时间戳**: {now}", 
+                content
+            )
+        
+        # 查找并替换英文时间戳
+        if "Last Updated" in content:
+            content = re.sub(
+                r"Last Updated\S*: .*?\(Pacific Time\)", 
+                f"Last Updated**: {pst_str} (Pacific Time)", 
+                content
+            )
+            
+            # 更新时间戳
+            content = re.sub(
+                r"Timestamp\S*: \d+", 
+                f"Timestamp**: {now}", 
                 content
             )
         
