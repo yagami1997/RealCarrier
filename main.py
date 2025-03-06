@@ -12,9 +12,15 @@ from pathlib import Path
 import re
 import io
 import time
+import csv
+import os
+import importlib.util
 
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
+from rich.style import Style
+
+from lnptool.phone_utils import format_phone_number
 
 # 初始化日志记录器
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -239,6 +245,427 @@ def lookup_single_number():
         ui.show_return_prompt()
         input()
 
+def batch_query():
+    """批量查询电话号码"""
+    console = Console()
+    
+    # 清屏并显示标题
+    ui.clear_screen()
+    ui.show_logo()
+    console.print("\n[bold]📊 批量查询[/bold]\n")
+    
+    # 预先安装所有必要的依赖
+    try:
+        # 使用importlib.util.find_spec检查模块是否已安装
+        import importlib.util
+        
+        # 检查是否需要安装pandas和Excel引擎
+        missing_deps = []
+        if importlib.util.find_spec("pandas") is None:
+            missing_deps.append("pandas")
+        
+        if importlib.util.find_spec("openpyxl") is None:
+            missing_deps.append("openpyxl")
+        
+        if importlib.util.find_spec("xlrd") is None:
+            missing_deps.append("xlrd")
+        
+        # 如果有缺失的依赖，提示用户安装
+        if missing_deps:
+            console.print(f"[yellow]{t('missing_dependencies')}: {', '.join(missing_deps)}[/yellow]")
+            if Confirm.ask(t('install_dependencies')):
+                console.print(f"[yellow]{t('installing_dependencies')}...[/yellow]")
+                import subprocess
+                try:
+                    for dep in missing_deps:
+                        console.print(f"[yellow]{t('installing')}: {dep}...[/yellow]")
+                        subprocess.check_call([sys.executable, "-m", "pip", "install", dep])
+                    console.print(f"[green]{t('dependencies_installed')}[/green]")
+                except Exception as e:
+                    console.print(f"[red]{t('error_installing_dependencies')}: {str(e)}[/red]")
+                    # 继续执行，可能部分功能受限
+            else:
+                console.print(f"[yellow]{t('continue_without_dependencies')}[/yellow]")
+                # 继续执行，可能部分功能受限
+    except Exception as e:
+        console.print(f"[red]{t('error_checking_dependencies')}: {str(e)}[/red]")
+        # 继续执行，可能部分功能受限
+    
+    # 使用水印暗纹提示文件拖拽（不使用边框）
+    console.print("\n\n", style="")  # 添加空行
+    console.print(f"🖱️  {t('drag_csv_hint')}", style="dim italic")
+    console.print("\n", style="")  # 添加空行
+    
+    # 获取CSV文件路径
+    while True:
+        try:
+            csv_path = input(f"\n{t('input_csv_path')}: ").strip()
+            # 处理拖拽文件时可能带有的引号和空格
+            csv_path = csv_path.strip('"').strip("'").strip()
+            
+            if not csv_path:
+                console.print("[yellow]" + t('please_enter_file_path') + "[/yellow]")
+                continue
+                
+            if not Path(csv_path).exists():
+                console.print(f"[red]{t('error_file_not_found')}: {csv_path}[/red]")
+                if not Confirm.ask(t('retry_input')):
+                    return
+                continue
+            break
+        except KeyboardInterrupt:
+            return
+        except Exception as e:
+            console.print(f"[red]{t('error')}: {str(e)}[/red]")
+            if not Confirm.ask(t('retry_input')):
+                return
+    
+    # 自动设置默认输出路径
+    default_output_path = f"{os.path.splitext(csv_path)[0]}_results.csv"
+    output_path = default_output_path
+    
+    # 确保输出目录存在
+    output_dir = Path(output_path).parent
+    if not output_dir.exists():
+        try:
+            output_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            console.print(f"[red]{t('error_creating_output_dir')}: {str(e)}[/red]")
+            return
+    
+    phone_numbers = []
+    
+    # 读取文件（支持CSV和Excel）
+    file_ext = os.path.splitext(csv_path)[1].lower()
+    
+    try:
+        if file_ext in ['.xlsx', '.xls']:
+            # 处理Excel文件
+            console.print(f"[yellow]{t('reading_excel')}...[/yellow]")
+            
+            try:
+                # 直接尝试读取Excel文件，不再检查依赖
+                import pandas as pd
+                
+                # 根据文件扩展名选择引擎
+                engine = 'openpyxl' if file_ext == '.xlsx' else 'xlrd'
+                
+                # 读取Excel文件
+                df = pd.read_excel(csv_path, engine=engine)
+                console.print(f"[green]{t('excel_read_success')}: {len(df)} {t('rows_found')}[/green]")
+                
+                # 遍历所有单元格寻找电话号码
+                for _, row in df.iterrows():
+                    for cell in row:
+                        if pd.notna(cell):  # 跳过NaN值
+                            cell_str = str(cell).strip()
+                            if cell_str:  # 跳过空字符串
+                                try:
+                                    # 尝试格式化电话号码
+                                    formatted_number = format_phone_number(cell_str)
+                                    phone_numbers.append(formatted_number)
+                                except:
+                                    # 静默跳过无效号码
+                                    pass
+            except ImportError as e:
+                # 如果依赖缺失，提示用户并继续使用CSV
+                console.print(f"[red]{t('error_excel_support')}: {str(e)}[/red]")
+                console.print(f"[yellow]{t('try_csv_instead')}[/yellow]")
+            except Exception as e:
+                # 其他错误
+                console.print(f"[red]{t('error_reading_excel')}: {str(e)}[/red]")
+                console.print(f"[yellow]{t('try_csv_instead')}[/yellow]")
+        else:
+            # 处理CSV文件
+            with open(csv_path, 'r') as f:
+                # 尝试检测分隔符
+                sample = f.read(1024)
+                f.seek(0)
+                
+                # 检测可能的分隔符
+                if ',' in sample:
+                    delimiter = ','
+                elif ';' in sample:
+                    delimiter = ';'
+                elif '\t' in sample:
+                    delimiter = '\t'
+                else:
+                    delimiter = ','  # 默认使用逗号
+                
+                reader = csv.reader(f, delimiter=delimiter)
+                
+                # 遍历所有行和列寻找电话号码
+                for row in reader:
+                    for cell in row:
+                        cell = cell.strip()
+                        if cell:  # 跳过空单元格
+                            try:
+                                # 尝试格式化电话号码
+                                formatted_number = format_phone_number(cell)
+                                phone_numbers.append(formatted_number)
+                            except:
+                                # 静默跳过无效号码
+                                pass
+    except Exception as e:
+        console.print(f"[red]{t('error_reading_file')}: {str(e)}[/red]")
+        return
+    
+    # 去除重复号码
+    phone_numbers = list(dict.fromkeys(phone_numbers))
+    
+    if not phone_numbers:
+        console.print(f"[yellow]{t('warning_no_valid_numbers')}[/yellow]")
+        return
+    
+    # 获取当前API提供商
+    provider_id = get_last_used_provider()
+    if not provider_id:
+        console.print(f"[red]{t('error_no_api_provider')}[/red]")
+        return
+    
+    # 显示找到的号码数量并确认
+    console.print(f"\n[green]{t('found_numbers').format(count=len(phone_numbers))}[/green]")
+    console.print(f"[green]{t('output_will_be_saved_to')}: {output_path}[/green]")
+    
+    if not Confirm.ask(t('confirm_continue')):
+        return
+    
+    # 执行批量查询
+    results = []
+    success_count = 0
+    error_count = 0
+    total = len(phone_numbers)
+    
+    # 重定向标准错误输出，避免显示API错误
+    original_stderr = sys.stderr
+    sys.stderr = io.StringIO()
+    
+    # 关闭日志输出到控制台
+    original_log_level = logging.getLogger().level
+    logging.getLogger().setLevel(logging.CRITICAL)
+    
+    try:
+        with console.status(f"[bold green]{t('querying_progress').format(completed=0, total=total)}") as status:
+            for i, phone in enumerate(phone_numbers, 1):
+                try:
+                    status.update(f"[bold green]{t('querying_progress').format(completed=i, total=total)}")
+                    result = provider_lookup_number(phone, provider_id=provider_id)
+                    
+                    if isinstance(result, Exception):
+                        # 记录错误但不显示
+                        error_count += 1
+                        error_msg = str(result)
+                        detailed_error = get_error_description(error_msg, provider_id)
+                        results.append({
+                            "phone": phone,
+                            "status": "error",
+                            "carrier": "-",
+                            "line_type": "-",
+                            "portable": "-",
+                            "error": detailed_error
+                        })
+                    elif isinstance(result, tuple):
+                        # 处理返回元组的情况
+                        # 尝试从元组中提取有用信息
+                        if len(result) >= 2:
+                            # 通常元组的第一个元素是提供商ID，第二个元素是结果或错误
+                            second_element = result[1]
+                            
+                            if isinstance(second_element, Exception):
+                                # 如果第二个元素是异常，提取错误信息
+                                error_count += 1
+                                error_msg = str(second_element)
+                                detailed_error = get_error_description(error_msg, provider_id)
+                                results.append({
+                                    "phone": phone,
+                                    "status": "error",
+                                    "carrier": "-",
+                                    "line_type": "-",
+                                    "portable": "-",
+                                    "error": detailed_error
+                                })
+                            elif hasattr(second_element, 'to_dict'):
+                                # 如果第二个元素有to_dict方法，说明是结果对象
+                                success_count += 1
+                                result_dict = second_element.to_dict()
+                                results.append({
+                                    "phone": phone,
+                                    "status": "success",
+                                    "carrier": result_dict.get("carrier", "-"),
+                                    "line_type": result_dict.get("line_type", "-"),
+                                    "portable": result_dict.get("portable", "-"),
+                                    "error": ""
+                                })
+                            elif isinstance(second_element, dict):
+                                # 如果第二个元素是字典，直接使用
+                                success_count += 1
+                                results.append({
+                                    "phone": phone,
+                                    "status": "success",
+                                    "carrier": second_element.get("carrier", "-"),
+                                    "line_type": second_element.get("line_type", "-"),
+                                    "portable": second_element.get("portable", "-"),
+                                    "error": ""
+                                })
+                            else:
+                                # 其他情况，记录为错误
+                                error_count += 1
+                                results.append({
+                                    "phone": phone,
+                                    "status": "error",
+                                    "carrier": "-",
+                                    "line_type": "-",
+                                    "portable": "-",
+                                    "error": f"{t('error_tuple_unknown')}: {str(second_element)}"
+                                })
+                        else:
+                            # 元组格式不符合预期
+                            error_count += 1
+                            results.append({
+                                "phone": phone,
+                                "status": "error",
+                                "carrier": "-",
+                                "line_type": "-",
+                                "portable": "-",
+                                "error": t('error_tuple_format')
+                            })
+                    else:
+                        # 成功查询
+                        success_count += 1
+                        result_dict = result.to_dict()
+                        results.append({
+                            "phone": phone,
+                            "status": "success",
+                            "carrier": result_dict.get("carrier", "-"),
+                            "line_type": result_dict.get("line_type", "-"),
+                            "portable": result_dict.get("portable", "-"),
+                            "error": ""
+                        })
+                        
+                except Exception as e:
+                    # 记录错误但不显示
+                    error_count += 1
+                    error_msg = str(e)
+                    detailed_error = get_error_description(error_msg, provider_id)
+                    results.append({
+                        "phone": phone,
+                        "status": "error",
+                        "carrier": "-",
+                        "line_type": "-",
+                        "portable": "-",
+                        "error": detailed_error
+                    })
+    finally:
+        # 恢复标准错误输出
+        sys.stderr = original_stderr
+        
+        # 恢复日志级别
+        logging.getLogger().setLevel(original_log_level)
+    
+    # 显示查询结果摘要
+    console.print("\n")
+    console.print(f"[bold green]{t('query_summary')}:[/bold green]")
+    console.print(f"[green]- {t('total_numbers')}: {total}[/green]")
+    console.print(f"[green]- {t('successful_queries')}: {success_count}[/green]")
+    console.print(f"[yellow]- {t('failed_queries')}: {error_count}[/yellow]")
+    
+    # 使用表格显示结果
+    from rich.table import Table
+    
+    table = Table(title=t('query_results'))
+    table.add_column(t('phone_number'), style="cyan")
+    table.add_column(t('carrier'), style="green")
+    table.add_column(t('line_type'), style="blue")
+    table.add_column(t('portable'), style="magenta")
+    table.add_column(t('status'), style="yellow")
+    
+    # 只显示前10个结果
+    display_count = min(10, len(results))
+    for i in range(display_count):
+        result = results[i]
+        status_str = "[green]✓[/green]" if result["status"] == "success" else "[red]✗[/red]"
+        table.add_row(
+            result["phone"],
+            result["carrier"],
+            result["line_type"],
+            result["portable"],
+            status_str
+        )
+    
+    console.print(table)
+    
+    if len(results) > 10:
+        console.print(f"[dim]{t('more_results_in_file').format(count=len(results)-10)}[/dim]")
+    
+    # 保存结果到CSV文件
+    try:
+        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            fieldnames = ['phone_number', 'carrier', 'line_type', 'portable', 'status', 'error']
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for result in results:
+                writer.writerow({
+                    'phone_number': result["phone"],
+                    'carrier': result["carrier"],
+                    'line_type': result["line_type"],
+                    'portable': result["portable"],
+                    'status': result["status"],
+                    'error': result["error"]
+                })
+        console.print(f"\n[green]{t('query_complete')}: {output_path}[/green]")
+    except Exception as e:
+        console.print(f"[red]{t('error_saving_results')}: {str(e)}[/red]")
+        return
+    
+    # 询问是否查看详细错误信息
+    if error_count > 0 and Confirm.ask(t('view_detailed_errors')):
+        error_table = Table(title=t('detailed_errors'))
+        error_table.add_column(t('phone_number'), style="cyan")
+        error_table.add_column(t('error_message'), style="red", no_wrap=False)
+        
+        for result in results:
+            if result["status"] == "error" and result["error"]:
+                error_table.add_row(result["phone"], result["error"])
+        
+        console.print(error_table)
+    
+    # 等待用户确认
+    input(f"\n{t('press_enter_return')}")
+
+def get_error_description(error_msg, provider_id):
+    """根据错误信息提供详细的错误描述"""
+    # Telnyx错误
+    if "403" in error_msg and "Telnyx" in error_msg:
+        return t('error_telnyx_403')
+    elif "401" in error_msg and "Telnyx" in error_msg:
+        return t('error_telnyx_401')
+    elif "429" in error_msg and "Telnyx" in error_msg:
+        return t('error_telnyx_429')
+    elif "500" in error_msg and "Telnyx" in error_msg:
+        return t('error_telnyx_500')
+    
+    # Twilio错误
+    elif "10002" in error_msg and "Twilio" in error_msg:
+        return t('error_twilio_10002')
+    elif "20003" in error_msg and "Twilio" in error_msg:
+        return t('error_twilio_20003')
+    elif "20404" in error_msg and "Twilio" in error_msg:
+        return t('error_twilio_20404')
+    
+    # 通用错误
+    elif "API返回格式错误" in error_msg:
+        if provider_id == "telnyx":
+            return t('error_telnyx_format')
+        else:
+            return t('error_twilio_format')
+    elif "timeout" in error_msg.lower() or "超时" in error_msg:
+        return t('error_timeout')
+    elif "connection" in error_msg.lower() or "连接" in error_msg:
+        return t('error_connection')
+    
+    # 默认错误
+    return error_msg
+
 def main():
     """主函数入口"""
     try:
@@ -265,7 +692,7 @@ def main():
             elif choice == "2":
                 lookup_single_number()
             elif choice == "3":
-                batch_lookup()
+                batch_query()
             elif choice == "4":
                 cache_management()
             elif choice == "5":

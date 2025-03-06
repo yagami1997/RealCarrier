@@ -344,8 +344,19 @@ def batch_lookup() -> None:
     # 获取CSV文件路径
     ui.clear_screen()
     ui.show_logo()
+    
+    # 显示文件拖拽提示（使用醒目的样式）
+    console.print("\n[bold cyan]" + "═" * 60 + "[/bold cyan]")
+    console.print("[bold cyan]║[/bold cyan]" + " " * 58 + "[bold cyan]║[/bold cyan]")
+    console.print("[bold cyan]║[/bold cyan]    🖱️  " + t('drag_csv_hint') + " " * (48 - len(t('drag_csv_hint'))) + "[bold cyan]║[/bold cyan]")
+    console.print("[bold cyan]║[/bold cyan]" + " " * 58 + "[bold cyan]║[/bold cyan]")
+    console.print("[bold cyan]" + "═" * 60 + "[/bold cyan]")
+    
     console.print(f"\n[bold]{t('enter_csv_path_prompt')}:[/]")
     csv_path = Prompt.ask(t('enter_csv_path'))
+    
+    # 处理拖拽文件时可能带有的引号和空格
+    csv_path = csv_path.strip('"').strip("'").strip()
     
     if not os.path.exists(csv_path):
         ui.show_lookup_error(f"{t('file_not_exist')}: {csv_path}")
@@ -378,24 +389,32 @@ def batch_lookup() -> None:
             if not is_header:
                 for field in header:
                     if field and field.strip():
-                        phone_number = field.strip()
-                        # 检查是否是有效的电话号码（只包含数字）
-                        if phone_number.isdigit() or (phone_number.startswith("+") and phone_number[1:].isdigit()):
-                            # 格式化电话号码
-                            if not phone_number.startswith("+1"):
-                                phone_number = "+1" + phone_number
-                            phone_numbers.append(phone_number)
+                        try:
+                            # 使用format_phone_number处理各种格式
+                            raw_number = field.strip()
+                            formatted_number = format_phone_number(raw_number)
+                            # 添加国际区号
+                            if not formatted_number.startswith("+1"):
+                                formatted_number = "+1" + formatted_number
+                            phone_numbers.append(formatted_number)
+                        except ValueError as e:
+                            # 记录无效号码但继续处理
+                            logger.warning(f"跳过无效号码 {field}: {str(e)}")
             
             # 读取剩余行
             for row in reader:
                 if row and row[0]:
-                    phone_number = row[0].strip()
-                    # 检查是否是有效的电话号码（只包含数字）
-                    if phone_number.isdigit() or (phone_number.startswith("+") and phone_number[1:].isdigit()):
-                        # 格式化电话号码
-                        if not phone_number.startswith("+1"):
-                            phone_number = "+1" + phone_number
-                        phone_numbers.append(phone_number)
+                    try:
+                        # 使用format_phone_number处理各种格式
+                        raw_number = row[0].strip()
+                        formatted_number = format_phone_number(raw_number)
+                        # 添加国际区号
+                        if not formatted_number.startswith("+1"):
+                            formatted_number = "+1" + formatted_number
+                        phone_numbers.append(formatted_number)
+                    except ValueError as e:
+                        # 记录无效号码但继续处理
+                        logger.warning(f"跳过无效号码 {row[0]}: {str(e)}")
         
         if not phone_numbers:
             ui.show_lookup_error(t('no_valid_phone_numbers'))
