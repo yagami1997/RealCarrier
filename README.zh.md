@@ -126,13 +126,13 @@ python main.py
 ```
 
 <div align="center">
-  <img width="800" alt="主界面" src="https://github.com/user-attachments/assets/aff0fd2e-5bea-4353-a07e-6ce4c8f88cc9">
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
 </div>
 
 ### API密钥配置
 
 <div align="center">
-  <img width="800" alt="API密钥配置" src="https://github.com/user-attachments/assets/48f4d0ee-1429-43cb-bd0d-ab2ec1b6784d">
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/875dea2e-f086-410b-b1c6-ebabc5999074" />
 </div>
 
 1. 从主菜单选择 "1. 🔑 API密钥管理"
@@ -143,7 +143,8 @@ python main.py
 ### 单号查询
 
 <div align="center">
-  <img width="800" alt="单号查询" src="https://github.com/user-attachments/assets/e2041685-9c12-4d09-a84e-5c312a8baff8">
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
 </div>
 
 1. 从主菜单选择 "2. 🔍 查询单个电话"
@@ -153,11 +154,11 @@ python main.py
 ### 批量查询
 
 <div align="center">
-  <img width="800" alt="批量查询" src="https://github.com/user-attachments/assets/ed9cdc2b-8cf0-4037-a66a-16a57df067d1">
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/6f83dd68-5b2b-4e3f-b5db-0a7673f11256" />
 </div>
 
 <div align="center">
-  <img width="800" alt="批量查询结果" src="https://github.com/user-attachments/assets/3f29dd78-5098-43bc-99cf-342035650fad">
+<img width="1114" alt="image" src="https://github.com/user-attachments/assets/cf8742f6-4eca-4d2f-99ee-5068491b7c8b" />
 </div>
 
 1. 从主菜单选择 "3. 📊 批量查询CSV文件"
@@ -168,7 +169,7 @@ python main.py
 ### 缓存管理
 
 <div align="center">
-  <img width="800" alt="缓存管理" src="https://github.com/user-attachments/assets/a8c4140b-55a1-47d8-a89e-0ce4ca6cc91a">
+<img width="800" alt="缓存管理" src="https://github.com/user-attachments/assets/a8c4140b-55a1-47d8-a89e-0ce4ca6cc91a">
 </div>
 
 1. 从主菜单选择 "4. 💾 缓存管理"
