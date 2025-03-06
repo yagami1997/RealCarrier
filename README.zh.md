@@ -35,7 +35,7 @@ RealCarrier是一款专业的美国电话号码状态查询系统，为通信服
 #### 号码类型
 
 | 类型 | 描述 |
-|------|------|
+|:------:|:------|
 | **实体号码** | 与实际SIM卡和物理设备关联的传统电话号码，由AT&T、Verizon、T-Mobile等传统运营商提供 |
 | **虚拟号码** | 通过VoIP服务提供的号码，不依赖特定物理位置或设备，由Twilio、Bandwidth、Telnyx等虚拟运营商提供 |
 
@@ -45,13 +45,13 @@ RealCarrier是一款专业的美国电话号码状态查询系统，为通信服
 
 RealCarrier支持两家领先的电信API供应商：
 
-- **Telnyx**: 全球通信平台，提供直接访问NPAC数据库的能力，是本工具的核心数据来源之一
+- **Telnyx**: 全球通信平台，提供直接访问NPAC数据库的能力，可获取最准确的号码携带信息
 - **Twilio**: 全球领先的通信API提供商，其Lookup API提供电话号码验证和运营商信息查询服务
 
 ## 🚀 功能亮点
 
 | 功能 | 描述 |
-|------|------|
+|:------:|:------|
 | 🔑 **API密钥管理** | 安全存储并管理您的Telnyx和Twilio API密钥 |
 | 🔄 **双API供应商** | 支持Telnyx和Twilio，用户可根据需求灵活选择 |
 | 🔍 **单号查询** | 快速查询单个电话号码的运营商信息 |
@@ -126,13 +126,13 @@ python main.py
 ```
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
+  <img width="900" alt="主界面" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
 </div>
 
 ### API密钥配置
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/875dea2e-f086-410b-b1c6-ebabc5999074" />
+  <img width="900" alt="API密钥配置" src="https://github.com/user-attachments/assets/875dea2e-f086-410b-b1c6-ebabc5999074" />
 </div>
 
 1. 从主菜单选择 "1. 🔑 API密钥管理"
@@ -143,8 +143,8 @@ python main.py
 ### 单号查询
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
+  <img width="900" alt="单号查询" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
+  <img width="900" alt="单号查询结果" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
 </div>
 
 1. 从主菜单选择 "2. 🔍 查询单个电话"
@@ -154,11 +154,11 @@ python main.py
 ### 批量查询
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/6f83dd68-5b2b-4e3f-b5db-0a7673f11256" />
+  <img width="900" alt="批量查询" src="https://github.com/user-attachments/assets/6f83dd68-5b2b-4e3f-b5db-0a7673f11256" />
 </div>
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/cf8742f6-4eca-4d2f-99ee-5068491b7c8b" />
+  <img width="900" alt="批量查询结果" src="https://github.com/user-attachments/assets/cf8742f6-4eca-4d2f-99ee-5068491b7c8b" />
 </div>
 
 1. 从主菜单选择 "3. 📊 批量查询CSV文件"
@@ -169,7 +169,7 @@ python main.py
 ### 缓存管理
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/cf3a213c-370d-45e3-8a89-7cb775409b61" />
+  <img width="900" alt="缓存管理" src="https://github.com/user-attachments/assets/cf3a213c-370d-45e3-8a89-7cb775409b61" />
 </div>
 
 1. 从主菜单选择 "4. 💾 缓存管理"
@@ -224,7 +224,7 @@ lnp cache info
 ### CSV输出示例
 
 | 电话号码 | 运营商 | 号码类型 | 携号转网 | 原运营商 |
-|---------|-------|---------|---------|---------|
+|:-------:|:-----:|:-------:|:-------:|:-------:|
 | +14155552671 | T-Mobile USA, Inc. | mobile | 是 | AT&T Mobility |
 | +14155552672 | Verizon Wireless | mobile | 否 | - |
 
@@ -254,8 +254,8 @@ pytest
 
 - 本工具使用Telnyx和Twilio API，可能会产生API调用费用。使用前请了解相关的计费政策。
 - **重要提示**：
-  - **Telnyx**需要完成KYC和充值才能正常使用。
-  - **Twilio**同样需要完成身份验证和账户充值才能使用API服务。
+  - **Telnyx** 需要完成KYC和充值才能正常使用。
+  - **Twilio** 同样需要完成身份验证和账户充值才能使用API服务。
 - 若API账户异常（未充值、身份验证未完成、API异常等）都会导致查询失败，请先确保账户状态正常。
 
 ## 📝 更新日志
