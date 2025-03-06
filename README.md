@@ -154,11 +154,11 @@ python main.py
 ### Batch Query
 
 <div align="center">
-  <img width="900" alt="Batch Query" src="https://github.com/user-attachments/assets/6f83dd68-5b2b-4e3f-b5db-0a7673f11256" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/c4abf38f-a841-4c85-8a19-c976303ccdbc" />
 </div>
 
 <div align="center">
-  <img width="900" alt="Batch Query Results" src="https://github.com/user-attachments/assets/cf8742f6-4eca-4d2f-99ee-5068491b7c8b" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/dc217174-e992-4819-959b-0c0a3bf98ba9" />
 </div>
 
 1. Select "3. 📊 Batch Query CSV File" from the main menu
