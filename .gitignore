@@ -98,3 +98,8 @@ project_management/actuals/reports/idea.md
 # 开发笔记和错误日志
 project_management/dev_notes/
 error_log.txt
+
+# 特定项目文件
+project_management/design/architecture.md
+project_management/memos/telnyx_kyc_memo.md
+project_management/dev_notes/code_review_note.md
