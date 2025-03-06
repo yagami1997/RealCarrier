@@ -35,7 +35,7 @@ When a number is transferred, its routing information is updated while the origi
 #### Number Types
 
 | Type | Description |
-|------|-------------|
+|:------:|:-------------|
 | **Physical Numbers** | Traditional phone numbers associated with actual SIM cards and physical devices, provided by traditional carriers (AT&T, Verizon, T-Mobile, etc.) |
 | **Virtual Numbers** | Numbers provided through VoIP services, not dependent on specific physical locations or devices, offered by virtual operators (Twilio, Bandwidth, Telnyx, etc.) |
 
@@ -51,7 +51,7 @@ RealCarrier supports two leading telecommunications API providers:
 ## 🚀 Key Features
 
 | Feature | Description |
-|---------|-------------|
+|:---------|:-------------|
 | 🔑 **API Key Management** | Securely store and manage your Telnyx and Twilio API keys |
 | 🔄 **Dual API Providers** | Support for both Telnyx and Twilio, with flexible selection based on user needs |
 | 🔍 **Single Number Query** | Quickly query carrier information for a single phone number |
@@ -126,13 +126,13 @@ python main.py
 ```
 
 <div align="center">
-  <img width="800" alt="Main Interface" src="https://github.com/user-attachments/assets/aff0fd2e-5bea-4353-a07e-6ce4c8f88cc9">
+  <img width="900" alt="Main Interface" src="https://github.com/user-attachments/assets/aff0fd2e-5bea-4353-a07e-6ce4c8f88cc9">
 </div>
 
 ### API Key Configuration
 
 <div align="center">
-  <img width="800" alt="API Key Configuration" src="https://github.com/user-attachments/assets/48f4d0ee-1429-43cb-bd0d-ab2ec1b6784d">
+  <img width="900" alt="API Key Configuration" src="https://github.com/user-attachments/assets/48f4d0ee-1429-43cb-bd0d-ab2ec1b6784d">
 </div>
 
 1. Select "1. 🔑 API Key Management" from the main menu
@@ -143,7 +143,11 @@ python main.py
 ### Single Number Query
 
 <div align="center">
-  <img width="800" alt="Single Number Query" src="https://github.com/user-attachments/assets/e2041685-9c12-4d09-a84e-5c312a8baff8">
+  <img width="900" alt="Single Number Query" src="https://github.com/user-attachments/assets/e2041685-9c12-4d09-a84e-5c312a8baff8">
+</div>
+
+<div align="center">
+  <img width="900" alt="Single Number Query Results" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9">
 </div>
 
 1. Select "2. 🔍 Query Single Phone" from the main menu
@@ -153,11 +157,11 @@ python main.py
 ### Batch Query
 
 <div align="center">
-  <img width="800" alt="Batch Query" src="https://github.com/user-attachments/assets/ed9cdc2b-8cf0-4037-a66a-16a57df067d1">
+  <img width="900" alt="Batch Query" src="https://github.com/user-attachments/assets/ed9cdc2b-8cf0-4037-a66a-16a57df067d1">
 </div>
 
 <div align="center">
-  <img width="800" alt="Batch Query Results" src="https://github.com/user-attachments/assets/3f29dd78-5098-43bc-99cf-342035650fad">
+  <img width="900" alt="Batch Query Results" src="https://github.com/user-attachments/assets/3f29dd78-5098-43bc-99cf-342035650fad">
 </div>
 
 1. Select "3. 📊 Batch Query CSV File" from the main menu
@@ -168,7 +172,7 @@ python main.py
 ### Cache Management
 
 <div align="center">
-  <img width="800" alt="Cache Management" src="https://github.com/user-attachments/assets/a8c4140b-55a1-47d8-a89e-0ce4ca6cc91a">
+  <img width="900" alt="Cache Management" src="https://github.com/user-attachments/assets/a8c4140b-55a1-47d8-a89e-0ce4ca6cc91a">
 </div>
 
 1. Select "4. 💾 Cache Management" from the main menu
@@ -223,7 +227,7 @@ lnp cache info
 ### CSV Output Example
 
 | Phone Number | Carrier | Number Type | Ported | Original Carrier |
-|--------------|---------|-------------|--------|-----------------|
+|:------------:|:-------:|:-----------:|:------:|:----------------:|
 | +14155552671 | T-Mobile USA, Inc. | mobile | Yes | AT&T Mobility |
 | +14155552672 | Verizon Wireless | mobile | No | - |
 
