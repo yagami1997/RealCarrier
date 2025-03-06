@@ -126,13 +126,13 @@ python main.py
 ```
 
 <div align="center">
-<img width="1114" alt="image" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
 </div>
 
 ### API密钥配置
 
 <div align="center">
-<img width="1114" alt="image" src="https://github.com/user-attachments/assets/875dea2e-f086-410b-b1c6-ebabc5999074" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/875dea2e-f086-410b-b1c6-ebabc5999074" />
 </div>
 
 1. 从主菜单选择 "1. 🔑 API密钥管理"
@@ -143,8 +143,8 @@ python main.py
 ### 单号查询
 
 <div align="center">
-<img width="1114" alt="image" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
-<img width="1114" alt="image" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
 </div>
 
 1. 从主菜单选择 "2. 🔍 查询单个电话"
@@ -154,11 +154,11 @@ python main.py
 ### 批量查询
 
 <div align="center">
-<img width="1114" alt="image" src="https://github.com/user-attachments/assets/6f83dd68-5b2b-4e3f-b5db-0a7673f11256" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/6f83dd68-5b2b-4e3f-b5db-0a7673f11256" />
 </div>
 
 <div align="center">
-<img width="1114" alt="image" src="https://github.com/user-attachments/assets/cf8742f6-4eca-4d2f-99ee-5068491b7c8b" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/cf8742f6-4eca-4d2f-99ee-5068491b7c8b" />
 </div>
 
 1. 从主菜单选择 "3. 📊 批量查询CSV文件"
@@ -169,7 +169,7 @@ python main.py
 ### 缓存管理
 
 <div align="center">
-<img width="800" alt="缓存管理" src="https://github.com/user-attachments/assets/a8c4140b-55a1-47d8-a89e-0ce4ca6cc91a">
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/cf3a213c-370d-45e3-8a89-7cb775409b61" />
 </div>
 
 1. 从主菜单选择 "4. 💾 缓存管理"
