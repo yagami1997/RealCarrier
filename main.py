@@ -132,16 +132,28 @@ def lookup_single_number():
         
         # 格式化电话号码
         try:
-            if not phone.startswith("+1"):
-                phone = "+1" + phone.strip()
+            # 使用format_phone_number函数处理各种格式的电话号码
+            from lnptool.phone_utils import format_phone_number
             
-            # 验证格式
-            if not re.match(r'^\+1\d{10}$', phone):
-                raise ValueError("无效的电话号码格式")
-            
-            # 显示确认
-            ui.show_phone_confirmation(phone)
-            if not Confirm.ask("确认继续"):
+            try:
+                # 格式化电话号码，支持多种输入格式
+                formatted_number = format_phone_number(phone)
+                
+                # 确保电话号码以+1开头
+                if not formatted_number.startswith("+1"):
+                    formatted_number = "+1" + formatted_number
+                
+                # 显示格式化后的电话号码
+                ui.show_phone_confirmation(formatted_number)
+                if not Confirm.ask("确认继续"):
+                    continue
+                
+                # 使用格式化后的电话号码进行查询
+                phone = formatted_number
+                
+            except ValueError as e:
+                ui.show_lookup_error(f"电话号码格式错误: {str(e)}")
+                input("\n按 Enter 键继续...")
                 continue
             
             # 显示查询进度
