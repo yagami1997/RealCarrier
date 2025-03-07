@@ -26,9 +26,4 @@ setuptools==75.8.2  # 打包工具
 # 兼容性说明：以上版本适用于Python 3.9+
 # 如需在低版本环境运行，请考虑降级相应依赖版本
 
-# 注：typer依赖已移除，因为代码中使用click而非typer
 
-from update_timestamp import get_pacific_time, get_pacific_timestamp
-
-current_time = get_pacific_time()
-current_timestamp = get_pacific_timestamp()
