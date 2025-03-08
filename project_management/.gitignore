@@ -1,0 +1,6 @@
+
+# 不上传到Git的实际工作文档
+control/MAIN_CONTROL.md
+PROJECT_PROGRESS.md
+actuals/reports/daily/*.md
+actuals/reports/weekly/*.md
