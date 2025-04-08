@@ -145,6 +145,8 @@ python main.py
 <div align="center">
   <img width="900" alt="Single Number Query" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
   <img width="900" alt="Single Number Query Results" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
+  <img width="900" alt="Single Number Query Results" src="https://github.com/user-attachments/assets/87dd2bbd-cdaa-4864-9a6b-688fe54cb350" />
+
 </div>
 
 1. Select "2. 🔍 Query Single Phone" from the main menu
