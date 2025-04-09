@@ -754,7 +754,7 @@ def system_info() -> None:
         'python': platform.python_version(),
         'cpu': cpu_info,
         'memory': f"{psutil.virtual_memory().total / (1024**3):.1f} GB",
-        'app_version': 'Beta v1.0.0',
+        'app_version': 'Beta v1.0.1',
         'api_status': api_status,
         'providers': provider_info
     }

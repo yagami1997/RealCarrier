@@ -220,6 +220,7 @@ TRANSLATIONS = {
         "state": "州",
         "rate_center": "费率中心",
         "provider": "提供商",
+        "virtual_number_provider": "虚拟号码提供商",
         "query_provider": "查询接口",
         "field": "字段",
         "value": "值",
@@ -539,6 +540,7 @@ TRANSLATIONS = {
         "state": "State",
         "rate_center": "Rate Center",
         "provider": "Provider",
+        "virtual_number_provider": "Virtual Number Provider",
         
         # Twilio Configuration
         "enter_twilio_credentials": "Enter Twilio Credentials",

@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🌟 RealCarrier Beta v1.0.0 🌟
+# 🌟 RealCarrier Beta v1.0.1 🌟
 
 <p>
   <a href="README.md">English Version</a> | <a href="README.zh.md">中文版</a>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Version-Beta%20v1.0.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-Beta%20v1.0.1-blue" alt="Version">
   <img src="https://img.shields.io/badge/Language-Python-green" alt="Language">
   <img src="https://img.shields.io/badge/License-GPL%203.0-yellow" alt="License">
 </p>
@@ -19,6 +19,21 @@
 </div>
 
 ---
+
+## 📝 Update Log
+
+### Beta v1.0.1 (2025-04-09)
+- **Enhanced Virtual Number Identification**: Added intelligent identification for 38 common virtual number providers
+- **Improved UI Display**: Added specific labeling for virtual number providers in query results
+- **Enhanced CSV Export**: Added "is_virtual" column to batch query results
+- **Fixed Carrier Type Detection**: Corrected the issue where number types weren't properly identified
+
+### Beta v1.0.0 (2025-03-06)
+- Program completely restructured, now supports dual API providers: Telnyx and Twilio
+- Users can choose to use one or both providers as needed
+- Added provider switching functionality, easily switch in the main menu
+- Optimized system information display, more accurately showing OS and processor information
+- Improved error handling and internationalization support
 
 ## 📱 Project Overview
 
@@ -260,19 +275,10 @@ pytest
   - **Twilio** similarly requires identity verification and account funding to use API services.
 - If your API account is abnormal (no deposit, incomplete verification, API anomalies, etc.), it will result in query failures. Please ensure your account status is normal first.
 
-## 📝 Update Log
-
-### Beta v1.0.0 (2025-03-06)
-- Program completely restructured, now supports dual API providers: Telnyx and Twilio
-- Users can choose to use one or both providers as needed
-- Added provider switching functionality, easily switch in the main menu
-- Optimized system information display, more accurately showing OS and processor information
-- Improved error handling and internationalization support
-
 ## ⚖️ License
 
 This project is released under the [GNU General Public License v3.0 (GPL 3.0)](LICENSE).
 
 ## 📅 Document Information
-- **Last Updated**: 2025-03-05 22:52:24 (Pacific Time)
-- **Timestamp**: 1741243944
+- **Last Updated**: 2025-04-09 15:30:42 (Pacific Time)
+- **Timestamp**: 1744145442

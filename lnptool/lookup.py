@@ -340,58 +340,107 @@ class LookupService:
             results: 查询结果列表
             output_file: 输出文件路径
         """
-        # 准备数据
+        # 检查结果列表是否为空
+        if not results:
+            logger.warning("No results to export")
+            return
+        
+        # 创建输出目录（如果不存在）
+        output_path = Path(output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # 将结果转换为字典列表
         data = []
+        
+        # 虚拟号码提供商列表
+        virtual_providers = [
+            "bandwidth", "bandwidth.com", 
+            "twilio", 
+            "vonage", 
+            "ringcentral", 
+            "google",
+            "grasshopper",
+            "8x8",
+            "telnyx",
+            "inteliquent",
+            "voxbone",
+            "plivo",
+            "flowroute",
+            "nexmo",
+            "sipstation",
+            "callcentric",
+            "skype",
+            "voip",
+            "sipgate",
+            "ooma",
+            "voipo",
+            "magicjack",
+            "line2",
+            "phonepower",
+            "telzio",
+            "dialpad",
+            "peerless",
+            "digicel",
+            "rebtel",
+            "sinch",
+            "onvoy",
+            "tcg",
+            "level3",
+            "bandwidth.com-nsr",
+            "at&tbusinessvoipwireline-nsr"
+        ]
+        
         for result in results:
+            # 转换为字典，仅保留需要的字段
             row = {
                 "phone_number": result.phone_number,
-                "country_code": result.country_code,
-                "carrier_name": result.carrier.name,
-                "carrier_type": result.carrier.type,
+                "carrier": result.carrier.name if result.carrier else "Unknown",
+                "type": result.carrier.type if result.carrier else "Unknown",
+                "line_type": "voip" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "voip" else 
+                             "landline" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "landline" else
+                             "mobile" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "mobile" else "unknown",
                 "status": result.status
             }
             
-            # 添加携号转网信息
+            # 检查是否为虚拟号码提供商
+            is_virtual = False
+            if row["line_type"] == "voip":
+                is_virtual = True
+            elif row["carrier"] and any(provider in row["carrier"].lower() for provider in virtual_providers):
+                is_virtual = True
+                row["line_type"] = "voip"  # 将线路类型更新为voip
+            
+            # 添加虚拟号码标识
+            row["is_virtual"] = "Yes" if is_virtual else "No"
+            
+            # 如果有携号转网信息，添加到行
             if result.portability:
-                row.update({
-                    "portable": result.portability.portable,
-                    "ported": result.portability.ported,
-                    "spid": result.portability.spid or "",
-                    "ocn": result.portability.ocn or ""
-                })
-                
-                # 添加前一个运营商信息
+                row["portable"] = "Yes" if result.portability.portable else "No"
+                row["ported"] = "Yes" if result.portability.ported else "No"
                 if result.portability.previous_carrier:
-                    row.update({
-                        "previous_carrier_name": result.portability.previous_carrier.name,
-                        "previous_carrier_type": result.portability.previous_carrier.type
-                    })
-                else:
-                    row.update({
-                        "previous_carrier_name": "",
-                        "previous_carrier_type": ""
-                    })
-            else:
-                row.update({
-                    "portable": False,
-                    "ported": False,
-                    "spid": "",
-                    "ocn": "",
-                    "previous_carrier_name": "",
-                    "previous_carrier_type": ""
-                })
+                    row["previous_carrier"] = result.portability.previous_carrier.name
+            
+            # 添加查询状态
+            row["query_status"] = "Success" if not result.status.startswith("error:") else "Failed"
+            row["error"] = result.status if result.status.startswith("error:") else ""
             
             data.append(row)
         
-        # 创建DataFrame并导出到CSV
-        try:
-            df = pd.DataFrame(data)
-            df.to_csv(output_file, index=False, encoding='utf-8')
-            logger.info(f"Results exported to {output_file}")
-        except Exception as e:
-            logger.error(f"Failed to export results to CSV: {e}")
-            console.print(f"[bold red]错误：导出结果失败：[/bold red]{str(e)}")
-            raise
+        # 创建DataFrame
+        df = pd.DataFrame(data)
+        
+        # 确保列顺序一致
+        columns = [
+            "phone_number", "carrier", "type", "line_type", "is_virtual",
+            "portable", "ported", "previous_carrier", 
+            "query_status", "error"
+        ]
+        # 只保留存在的列
+        columns = [col for col in columns if col in df.columns]
+        
+        # 导出到CSV
+        df.to_csv(output_file, index=False, columns=columns)
+        logger.info(f"Results exported to {output_file}")
 
 
 def display_lookup_result(result: LookupResult) -> None:

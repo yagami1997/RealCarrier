@@ -37,7 +37,7 @@ def get_pst_time():
 def validate_file_format(content):
     """验证文件格式是否正确"""
     # 检查是否为README文件
-    if "RealCarrier" in content and "Beta v1.0.0" in content:
+    if "RealCarrier" in content and "Beta v1.0.1" in content:
         if not re.search(r"## 📅 (?:Document Information|文档信息)", content):
             return False, "缺少文档信息部分"
         return True, "README"

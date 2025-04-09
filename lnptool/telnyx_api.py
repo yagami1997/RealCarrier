@@ -283,47 +283,6 @@ class TelnyxAPI(LookupProvider):
             logger.error(f"Failed to get API key from keyring: {e}")
             return None
     
-    def _parse_response(self, response_data: Dict[str, Any], phone_number: str) -> LookupResult:
-        """
-        解析 Telnyx API 响应，转换为标准 LookupResult
-        
-        Args:
-            response_data: API 响应数据
-            phone_number: 查询的电话号码
-            
-        Returns:
-            LookupResult: 解析后的查询结果
-        """
-        # 提取数据对象
-        data = response_data.get("data", {})
-        
-        # 提取运营商信息
-        carrier_info = data.get("carrier", {})
-        
-        # 提取城市和州信息
-        city = carrier_info.get("city")
-        state = carrier_info.get("state")
-        
-        # 提取线路类型
-        line_type = self._map_line_type(carrier_info.get("type"))
-        
-        # 创建标准查询结果
-        result = LookupResult(
-            phone_number=phone_number,
-            carrier=carrier_info.get("name"),
-            carrier_type=carrier_info.get("type"),
-            portable=data.get("portability", {}).get("portable"),
-            city=city,
-            state=state,
-            rate_center=carrier_info.get("rate_center"),
-            lata=carrier_info.get("lata"),
-            line_type=line_type,
-            provider=self.get_provider_name(),
-            raw_data=response_data
-        )
-        
-        return result
-    
     def _map_line_type(self, carrier_type: Optional[str]) -> Optional[str]:
         """
         将 Telnyx 运营商类型映射到标准线路类型
@@ -347,6 +306,114 @@ class TelnyxAPI(LookupProvider):
             return "voip"
         else:
             return "unknown"
+    
+    def _is_virtual_number_provider(self, carrier_name: Optional[str]) -> bool:
+        """
+        根据运营商名称判断是否为虚拟号码提供商
+        
+        Args:
+            carrier_name: 运营商名称
+            
+        Returns:
+            bool: 如果是虚拟号码提供商返回True，否则返回False
+        """
+        if not carrier_name:
+            return False
+            
+        # 将运营商名称转换为小写以进行不区分大小写的比较
+        carrier_name = carrier_name.lower()
+        
+        # 已知的美国虚拟号码提供商列表
+        virtual_providers = [
+            "bandwidth", "bandwidth.com", 
+            "twilio", 
+            "vonage", 
+            "ringcentral", 
+            "googlevoice", "google voice",
+            "grasshopper",
+            "8x8",
+            "telnyx",
+            "inteliquent",
+            "voxbone",
+            "plivo",
+            "flowroute",
+            "nexmo",
+            "sipstation",
+            "callcentric",
+            "skype",
+            "voip.ms",
+            "sipgate",
+            "ooma",
+            "voipo",
+            "magicjack", "magic jack",
+            "line2",
+            "phonepower",
+            "telzio",
+            "dialpad",
+            "peerless",
+            "digicel",
+            "rebtel",
+            "sinch",
+            "onvoy",
+            "tcg",
+            "level3",
+            "bandwidth.com-nsr",
+            "at&tbusinessvoipwireline-nsr"
+        ]
+        
+        # 检查运营商名称是否包含任何已知的虚拟提供商
+        for provider in virtual_providers:
+            if provider in carrier_name:
+                return True
+                
+        return False
+    
+    def _parse_response(self, response_data: Dict[str, Any], phone_number: str) -> LookupResult:
+        """
+        解析 Telnyx API 响应，转换为标准 LookupResult
+        
+        Args:
+            response_data: API 响应数据
+            phone_number: 查询的电话号码
+            
+        Returns:
+            LookupResult: 解析后的查询结果
+        """
+        # 提取数据对象
+        data = response_data.get("data", {})
+        
+        # 提取运营商信息
+        carrier_info = data.get("carrier", {})
+        carrier_name = carrier_info.get("name")
+        carrier_type = carrier_info.get("type")
+        
+        # 提取城市和州信息
+        city = carrier_info.get("city")
+        state = carrier_info.get("state")
+        
+        # 根据运营商类型确定线路类型
+        line_type = self._map_line_type(carrier_type)
+        
+        # 如果线路类型未知或为空，并且运营商名称表明这是虚拟号码提供商，则设置为voip
+        if (line_type is None or line_type == "unknown") and self._is_virtual_number_provider(carrier_name):
+            line_type = "voip"
+        
+        # 创建标准查询结果
+        result = LookupResult(
+            phone_number=phone_number,
+            carrier=carrier_name,
+            carrier_type=carrier_type,
+            portable=data.get("portability", {}).get("portable"),
+            city=city,
+            state=state,
+            rate_center=carrier_info.get("rate_center"),
+            lata=carrier_info.get("lata"),
+            line_type=line_type,
+            provider=self.get_provider_name(),
+            raw_data=response_data
+        )
+        
+        return result
 
 
 # 辅助函数

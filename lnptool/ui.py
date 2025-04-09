@@ -49,7 +49,7 @@ class UI:
         """
         
         # 设置版本和其他信息
-        version_text = "Beta v1.0.0"
+        version_text = "Beta v1.0.1"
         subtitle_text = t("supports_telnyx_twilio") if t("supports_telnyx_twilio") != "supports_telnyx_twilio" else "支持 Telnyx & Twilio API"
         author_text = "By Yagami"
         repo_text = t("repository_address") + ": https://github.com/yagami1997/RealCarrier"
@@ -162,16 +162,68 @@ class UI:
         
         # 添加基本信息
         result_table.add_row(t('phone_number'), f"[bold]{phone_number}[/bold]")
-        result_table.add_row(t('carrier'), f"[yellow]{result.get('carrier', t('unknown'))}[/yellow]")
+        
+        # 获取运营商名称
+        carrier_name = result.get('carrier', t('unknown'))
+        
+        # 检查运营商是否为虚拟号码提供商
+        carrier_type = result.get('carrier_type', '').lower() if result.get('carrier_type') else ''
+        line_type = result.get('line_type', 'unknown')
+        
+        # 根据运营商名称判断是否为虚拟号码提供商
+        is_virtual = False
+        if line_type == 'voip':
+            is_virtual = True
+        elif carrier_name and any(provider in carrier_name.lower() for provider in [
+            "bandwidth", "bandwidth.com",
+            "twilio", 
+            "vonage", 
+            "ringcentral", 
+            "google",
+            "grasshopper",
+            "8x8",
+            "telnyx",
+            "inteliquent",
+            "voxbone",
+            "plivo",
+            "flowroute",
+            "nexmo",
+            "sipstation",
+            "callcentric",
+            "skype",
+            "voip",
+            "sipgate",
+            "ooma",
+            "voipo",
+            "magicjack",
+            "line2",
+            "phonepower",
+            "telzio",
+            "dialpad",
+            "peerless",
+            "digicel",
+            "rebtel",
+            "sinch",
+            "onvoy",
+            "tcg",
+            "level3",
+            "nsr"
+        ]):
+            is_virtual = True
+            
+        # 显示运营商名称，如果是虚拟号码提供商则添加指示
+        if is_virtual:
+            result_table.add_row(t('carrier'), f"[yellow]{carrier_name}[/yellow] [magenta]({t('virtual_number_provider')})[/magenta]")
+        else:
+            result_table.add_row(t('carrier'), f"[yellow]{carrier_name}[/yellow]")
         
         # 添加线路类型（使用不同颜色）
-        line_type = result.get('line_type', t('unknown'))
-        if line_type == 'mobile':
+        if is_virtual or line_type == 'voip':
+            line_type_display = f"[magenta]{t('voip_phone')}[/magenta]"
+        elif line_type == 'mobile':
             line_type_display = f"[green]{t('mobile_phone')}[/green]"
         elif line_type == 'landline':
             line_type_display = f"[blue]{t('landline_phone')}[/blue]"
-        elif line_type == 'voip':
-            line_type_display = f"[magenta]{t('voip_phone')}[/magenta]"
         else:
             line_type_display = f"[dim]{t('unknown')}[/dim]"
         result_table.add_row(t('line_type'), line_type_display)
