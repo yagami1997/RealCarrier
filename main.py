@@ -591,8 +591,8 @@ def batch_query():
     table.add_column(t('portable'), style="magenta")
     table.add_column(t('status'), style="yellow")
     
-    # 只显示前10个结果
-    display_count = min(10, len(results))
+    # 只显示前50个结果 (Maximum display 50 results)
+    display_count = min(50, len(results))
     for i in range(display_count):
         result = results[i]
         status_str = "[green]✓[/green]" if result["status"] == "success" else "[red]✗[/red]"
@@ -606,8 +606,8 @@ def batch_query():
     
     console.print(table)
     
-    if len(results) > 10:
-        console.print(f"[dim]{t('more_results_in_file').format(count=len(results)-10)}[/dim]")
+    if len(results) > 50:
+        console.print(f"[dim]🇨🇳 {t('more_results_in_file').format(count=len(results)-50)} 🇺🇸 {len(results)-50} more results saved to file[/dim]")
     
     # 保存结果到CSV文件
     try:
