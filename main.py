@@ -2,7 +2,7 @@
 """
 RealCarrier - 美国电话号码查询工具
 支持多API接口 (Telnyx & Twilio)
-Beta 1.0.0
+Beta v1.1.0
 """
 
 import sys
@@ -505,7 +505,11 @@ def batch_query():
                                     "status": "success",
                                     "carrier": result_dict.get("carrier", "-"),
                                     "line_type": result_dict.get("line_type", "-"),
+                                    "city": result_dict.get("city", ""),
+                                    "state": result_dict.get("state", ""),
                                     "portable": result_dict.get("portable", "-"),
+                                    "ported_status": result_dict.get("ported_status", t("not_ported")),
+                                    "ported_date": result_dict.get("ported_date", ""),
                                     "error": ""
                                 })
                             elif isinstance(second_element, dict):
@@ -516,7 +520,11 @@ def batch_query():
                                     "status": "success",
                                     "carrier": second_element.get("carrier", "-"),
                                     "line_type": second_element.get("line_type", "-"),
+                                    "city": second_element.get("city", ""),
+                                    "state": second_element.get("state", ""),
                                     "portable": second_element.get("portable", "-"),
+                                    "ported_status": second_element.get("ported_status", t("not_ported")),
+                                    "ported_date": second_element.get("ported_date", ""),
                                     "error": ""
                                 })
                             else:
@@ -550,7 +558,11 @@ def batch_query():
                             "status": "success",
                             "carrier": result_dict.get("carrier", "-"),
                             "line_type": result_dict.get("line_type", "-"),
+                            "city": result_dict.get("city", ""),
+                            "state": result_dict.get("state", ""),
                             "portable": result_dict.get("portable", "-"),
+                            "ported_status": result_dict.get("ported_status", t("not_ported")),
+                            "ported_date": result_dict.get("ported_date", ""),
                             "error": ""
                         })
                         
@@ -588,7 +600,8 @@ def batch_query():
     table.add_column(t('phone_number'), style="cyan")
     table.add_column(t('carrier'), style="green")
     table.add_column(t('line_type'), style="blue")
-    table.add_column(t('portable'), style="magenta")
+    table.add_column(t('location'), style="yellow")
+    table.add_column(t('ported_status'), style="magenta")
     table.add_column(t('status'), style="yellow")
     
     # 只显示前50个结果 (Maximum display 50 results)
@@ -596,11 +609,26 @@ def batch_query():
     for i in range(display_count):
         result = results[i]
         status_str = "[green]✓[/green]" if result["status"] == "success" else "[red]✗[/red]"
+        
+        # 构建地理位置信息
+        location = []
+        if result.get("city"):
+            location.append(result["city"])
+        if result.get("state"):
+            location.append(result["state"])
+        location_str = ", ".join(location) if location else "-"
+        
+        # 获取携号转网状态，确保显示"未转移"
+        ported_status = result.get("ported_status", t("not_ported"))
+        if not ported_status or ported_status == "-":
+            ported_status = t("not_ported")
+        
         table.add_row(
             result["phone"],
             result["carrier"],
             result["line_type"],
-            result["portable"],
+            location_str,
+            ported_status,
             status_str
         )
     
@@ -612,7 +640,7 @@ def batch_query():
     # 保存结果到CSV文件
     try:
         with open(output_path, 'w', newline='', encoding='utf-8') as f:
-            fieldnames = ['phone_number', 'carrier', 'line_type', 'portable', 'status', 'error']
+            fieldnames = ['phone_number', 'carrier', 'line_type', 'city', 'state', 'portable', 'ported_status', 'ported_date', 'status', 'error']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             for result in results:
@@ -620,7 +648,11 @@ def batch_query():
                     'phone_number': result["phone"],
                     'carrier': result["carrier"],
                     'line_type': result["line_type"],
+                    'city': result.get("city", ""),
+                    'state': result.get("state", ""),
                     'portable': result["portable"],
+                    'ported_status': result.get("ported_status", t("not_ported")),
+                    'ported_date': result.get("ported_date", ""),
                     'status': result["status"],
                     'error': result["error"]
                 })

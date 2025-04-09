@@ -61,4 +61,4 @@ def setup_logging(log_level=logging.INFO):
 # 所有重要信息都会通过rich表格展示
 logger = setup_logging(logging.WARNING)
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"

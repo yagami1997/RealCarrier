@@ -399,7 +399,11 @@ class LookupService:
                 "line_type": "voip" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "voip" else 
                              "landline" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "landline" else
                              "mobile" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "mobile" else "unknown",
-                "status": result.status
+                "status": result.status,
+                "city": result.city if result.city else "",
+                "state": result.state if result.state else "",
+                "ported_status": result.ported_status if result.ported_status else t("not_ported"),
+                "ported_date": result.ported_date if result.ported_date else ""
             }
             
             # 检查是否为虚拟号码提供商
@@ -432,7 +436,7 @@ class LookupService:
         # 确保列顺序一致
         columns = [
             "phone_number", "carrier", "type", "line_type", "is_virtual",
-            "portable", "ported", "previous_carrier", 
+            "city", "state", "portable", "ported", "ported_status", "ported_date", "previous_carrier", 
             "query_status", "error"
         ]
         # 只保留存在的列
@@ -498,6 +502,15 @@ def display_lookup_result(result: LookupResult) -> None:
     table.add_row(t("carrier"), result.carrier.name)
     table.add_row(t("number_type"), result.carrier.type)
     
+    # 添加地理位置信息
+    if result.city or result.state:
+        location = []
+        if result.city:
+            location.append(result.city)
+        if result.state:
+            location.append(result.state)
+        table.add_row(t("location"), ", ".join(location))
+    
     # 添加携号转网信息
     if result.portability:
         portable_status = "[green]" + t("yes") + "[/green]" if result.portability.portable else "[red]" + t("no") + "[/red]"
@@ -505,6 +518,14 @@ def display_lookup_result(result: LookupResult) -> None:
         
         table.add_row(t("portable"), portable_status)
         table.add_row(t("ported"), ported_status)
+        
+        # 添加携号转网状态显示
+        transfer_status = result.ported_status if result.ported_status else t("not_ported")
+        table.add_row(t("ported_status"), transfer_status)
+        
+        # 添加携号转网日期显示（如果有）
+        if result.ported_date:
+            table.add_row(t("ported_date"), result.ported_date)
         
         if result.portability.spid:
             table.add_row(t("service_provider_id"), result.portability.spid)

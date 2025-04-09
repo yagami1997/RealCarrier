@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="realcarrier",
-    version="1.0.1",
+    version="1.1.0",
     author="Your Name",
     author_email="your.email@example.com",
     description="美国电话号码查询工具 - 支持多API接口 (Telnyx & Twilio)",

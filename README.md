@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🌟 RealCarrier Beta v1.0.1 🌟
+# 🌟 RealCarrier Beta v1.1.0 🌟
 
 <p>
   <a href="README.md">English Version</a> | <a href="README.zh.md">中文版</a>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Version-Beta%20v1.0.1-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-Beta%20v1.1.0-blue" alt="Version">
   <img src="https://img.shields.io/badge/Language-Python-green" alt="Language">
   <img src="https://img.shields.io/badge/License-GPL%203.0-yellow" alt="License">
 </p>
@@ -21,6 +21,12 @@
 ---
 
 ## 📝 Update Log
+
+### Beta v1.1.0 (2025-04-10)
+- Added geographic location information (city, state) display in query results
+- Added port status and porting date information display
+- Optimized carrier name display using more accurate spid_carrier_name
+- Enhanced batch query results display for consistency with single number query
 
 ### Beta v1.0.1 (2025-04-09)
 - **Enhanced Virtual Number Identification**: Added intelligent identification for 38 common virtual number providers

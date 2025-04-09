@@ -387,9 +387,21 @@ class TelnyxAPI(LookupProvider):
         carrier_name = carrier_info.get("name")
         carrier_type = carrier_info.get("type")
         
-        # 提取城市和州信息
-        city = carrier_info.get("city")
-        state = carrier_info.get("state")
+        # 提取携号转网信息
+        portability_info = data.get("portability", {})
+        
+        # 优先使用spid_carrier_name作为运营商名称，如果存在的话
+        spid_carrier_name = portability_info.get("spid_carrier_name")
+        if spid_carrier_name:
+            carrier_name = spid_carrier_name
+        
+        # 提取城市和州信息，优先使用portability中的信息
+        city = portability_info.get("city") or carrier_info.get("city")
+        state = portability_info.get("state") or carrier_info.get("state")
+        
+        # 提取携号转网状态和日期
+        ported_status = portability_info.get("ported_status")
+        ported_date = portability_info.get("ported_date")
         
         # 根据运营商类型确定线路类型
         line_type = self._map_line_type(carrier_type)
@@ -403,13 +415,15 @@ class TelnyxAPI(LookupProvider):
             phone_number=phone_number,
             carrier=carrier_name,
             carrier_type=carrier_type,
-            portable=data.get("portability", {}).get("portable"),
+            portable=portability_info.get("portable"),
             city=city,
             state=state,
             rate_center=carrier_info.get("rate_center"),
             lata=carrier_info.get("lata"),
             line_type=line_type,
             provider=self.get_provider_name(),
+            ported_status=ported_status,
+            ported_date=ported_date,
             raw_data=response_data
         )
         

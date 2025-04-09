@@ -49,7 +49,7 @@ class UI:
         """
         
         # 设置版本和其他信息
-        version_text = "Beta v1.0.1"
+        version_text = "Beta v1.1.0"
         subtitle_text = t("supports_telnyx_twilio") if t("supports_telnyx_twilio") != "supports_telnyx_twilio" else "支持 Telnyx & Twilio API"
         author_text = "By Yagami"
         repo_text = t("repository_address") + ": https://github.com/yagami1997/RealCarrier"
@@ -227,6 +227,28 @@ class UI:
         else:
             line_type_display = f"[dim]{t('unknown')}[/dim]"
         result_table.add_row(t('line_type'), line_type_display)
+        
+        # 添加地理位置信息
+        city = result.get('city')
+        state = result.get('state')
+        if city or state:
+            location = []
+            if city:
+                location.append(city)
+            if state:
+                location.append(state)
+            result_table.add_row(t('location'), ", ".join(location))
+        
+        # 添加携号转网状态和日期
+        ported_status = result.get('ported_status')
+        if ported_status:
+            result_table.add_row(t('ported_status'), ported_status)
+        else:
+            result_table.add_row(t('ported_status'), t('not_ported'))
+            
+        ported_date = result.get('ported_date')
+        if ported_date:
+            result_table.add_row(t('ported_date'), ported_date)
         
         # 添加其他信息
         if result.get('portable') is not None:

@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🌟 RealCarrier Beta v1.0.1 🌟
+# 🌟 RealCarrier Beta v1.1.0 🌟
 
 <p>
   <a href="README.md">English Version</a> | <a href="README.zh.md">中文版</a>
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/版本-Beta%20v1.0.1-blue" alt="版本">
+  <img src="https://img.shields.io/badge/版本-Beta%20v1.1.0-blue" alt="版本">
   <img src="https://img.shields.io/badge/语言-Python-green" alt="语言">
   <img src="https://img.shields.io/badge/许可证-GPL%203.0-yellow" alt="许可证">
 </p>
@@ -20,7 +20,13 @@
 
 ---
 
-## 📝 更新日志
+## 更新日志
+
+### Beta v1.1.0 (2025-04-10)
+- 添加地理位置信息（城市、州）显示
+- 添加携号转网状态和日期信息显示
+- 优化运营商名称显示，使用更准确的spid_carrier_name
+- 改进批量查询结果展示，与单个号码查询保持一致
 
 ### Beta v1.0.1 (2025-04-09)
 - **增强虚拟号码识别**: 添加了针对38家常见虚拟号码提供商的智能识别功能

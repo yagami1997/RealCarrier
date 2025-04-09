@@ -31,6 +31,8 @@ class LookupResult:
                  lata: Optional[str] = None,
                  line_type: Optional[str] = None,
                  provider: Optional[str] = None,
+                 ported_status: Optional[str] = None,
+                 ported_date: Optional[str] = None,
                  raw_data: Optional[Dict[str, Any]] = None):
         """
         初始化查询结果
@@ -46,6 +48,8 @@ class LookupResult:
             lata: 本地接入传输区
             line_type: 线路类型 (mobile, landline, voip, unknown)
             provider: 提供此结果的提供商名称
+            ported_status: 携号转网状态
+            ported_date: 携号转网日期
             raw_data: 原始响应数据
         """
         self.phone_number = phone_number
@@ -58,6 +62,8 @@ class LookupResult:
         self.lata = lata
         self.line_type = line_type
         self.provider = provider
+        self.ported_status = ported_status
+        self.ported_date = ported_date
         self.raw_data = raw_data or {}
         self.timestamp = time.time()  # 添加时间戳，用于缓存过期判断
     
@@ -74,6 +80,8 @@ class LookupResult:
             "lata": self.lata,
             "line_type": self.line_type,
             "provider": self.provider,
+            "ported_status": self.ported_status,
+            "ported_date": self.ported_date,
             "timestamp": self.timestamp
         }
     
@@ -91,6 +99,8 @@ class LookupResult:
             lata=data.get("lata"),
             line_type=data.get("line_type"),
             provider=data.get("provider"),
+            ported_status=data.get("ported_status"),
+            ported_date=data.get("ported_date"),
             raw_data=data.get("raw_data", {})
         )
         if "timestamp" in data:
