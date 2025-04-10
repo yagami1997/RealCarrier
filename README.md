@@ -70,7 +70,9 @@ RealCarrier supports two leading telecommunications API providers:
 - **Twilio**: A world-leading communications API provider whose Lookup API offers phone number verification and carrier information query services
   
 **Special Notice:** After a month-long back-and-forth and struggle with Telnyx customer support, they have finally unlocked my account. I can now successfully call the API to complete the verification process for my program. Please note: the IP address used during Telnyx registration and the payment method (credit card/PayPal) **must originate from the same country**. For example, if you register with a Singapore IP and pay with a US PayPal account, your registration will be rejected. However, if you register with a US IP and use a US PayPal account, it will not be rejected.
+
 <img width="900" alt="image" src="https://github.com/user-attachments/assets/f6a9bbb4-323c-4c3b-8ac8-3f7d3ec4dfe6" />
+
 ```json
 {
   "country_code": "US",
