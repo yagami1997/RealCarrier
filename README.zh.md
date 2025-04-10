@@ -68,6 +68,49 @@ RealCarrier支持两家领先的电信API供应商：
 
 - **Telnyx**: 全球通信平台，提供直接访问NPAC数据库的能力，可获取最准确的号码携带信息
 - **Twilio**: 全球领先的通信API提供商，其Lookup API提供电话号码验证和运营商信息查询服务
+- 特别提示：经过和Telnyx客服长达一个月的扯皮和斗争，他们终于给我的账户解锁，我可以顺利调用API来完成程序的验证工作，请注意，注册Telnyx时候的IP地址和支付使用的银行卡/Paypal信息必须在一个国家，例如：用新加坡IP注册Telnyx，用Paypal US支付就会被拒绝。用美国IP注册Telnyx，用Paypal注册就不会被拒绝。
+
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/f6a9bbb4-323c-4c3b-8ac8-3f7d3ec4dfe6" />
+
+```json
+{
+  "country_code": "US",
+  "national_format": "(406) XXX-XXX",
+  "phone_number": "+1406XXXXXXX",
+  "fraud": null,
+  "carrier": {
+    "mobile_country_code": "",
+    "mobile_network_code": "",
+    "name": "T-MOBILE USA, INC.",
+    "type": "mobile",
+    "error_code": null,
+    "normalized_carrier": "T-Mobile USA"
+  },
+  "caller_name": {
+    "caller_name": "WIRELESS CALLER",
+    "error_code": null
+  },
+  "nnid_override": null,
+  "portability": {
+    "lrn": null,
+    "ported_status": "",
+    "ported_date": "",
+    "ocn": "6034",
+    "line_type": "mobile",
+    "spid": "",
+    "spid_carrier_name": "SPRINT SPECTRUM L.P.- MT",
+    "spid_carrier_type": "",
+    "altspid": "",
+    "altspid_carrier_name": "",
+    "altspid_carrier_type": "",
+    "city": "MISSOULA",
+    "state": "Montana"
+  },
+  "valid_number": true,
+  "record_type": "number_lookup"
+}
+
+```
 
 ## 🚀 功能亮点
 
