@@ -33,6 +33,9 @@ class LookupResult:
                  provider: Optional[str] = None,
                  ported_status: Optional[str] = None,
                  ported_date: Optional[str] = None,
+                 ported: bool = False,
+                 previous_carrier: Optional[str] = None,
+                 status: Optional[str] = "success",
                  raw_data: Optional[Dict[str, Any]] = None):
         """
         初始化查询结果
@@ -50,6 +53,9 @@ class LookupResult:
             provider: 提供此结果的提供商名称
             ported_status: 携号转网状态
             ported_date: 携号转网日期
+            ported: 是否已携号转网
+            previous_carrier: 前一个运营商
+            status: 查询状态，默认为"success"
             raw_data: 原始响应数据
         """
         self.phone_number = phone_number
@@ -64,6 +70,9 @@ class LookupResult:
         self.provider = provider
         self.ported_status = ported_status
         self.ported_date = ported_date
+        self.ported = ported
+        self.previous_carrier = previous_carrier
+        self.status = status
         self.raw_data = raw_data or {}
         self.timestamp = time.time()  # 添加时间戳，用于缓存过期判断
     
@@ -82,6 +91,9 @@ class LookupResult:
             "provider": self.provider,
             "ported_status": self.ported_status,
             "ported_date": self.ported_date,
+            "ported": self.ported,
+            "previous_carrier": self.previous_carrier,
+            "status": self.status,
             "timestamp": self.timestamp
         }
     
@@ -101,6 +113,9 @@ class LookupResult:
             provider=data.get("provider"),
             ported_status=data.get("ported_status"),
             ported_date=data.get("ported_date"),
+            ported=data.get("ported", False),
+            previous_carrier=data.get("previous_carrier"),
+            status=data.get("status"),
             raw_data=data.get("raw_data", {})
         )
         if "timestamp" in data:

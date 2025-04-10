@@ -163,7 +163,7 @@ class UI:
         # 添加基本信息
         result_table.add_row(t('phone_number'), f"[bold]{phone_number}[/bold]")
         
-        # 获取运营商名称
+        # 获取当前运营商名称
         carrier_name = result.get('carrier', t('unknown'))
         
         # 检查运营商是否为虚拟号码提供商
@@ -211,7 +211,7 @@ class UI:
         ]):
             is_virtual = True
             
-        # 显示运营商名称，如果是虚拟号码提供商则添加指示
+        # 显示当前运营商名称，如果是虚拟号码提供商则添加指示
         if is_virtual:
             result_table.add_row(t('carrier'), f"[yellow]{carrier_name}[/yellow] [magenta]({t('virtual_number_provider')})[/magenta]")
         else:
@@ -240,11 +240,19 @@ class UI:
             result_table.add_row(t('location'), ", ".join(location))
         
         # 添加携号转网状态和日期
-        ported_status = result.get('ported_status')
-        if ported_status:
-            result_table.add_row(t('ported_status'), ported_status)
+        ported = result.get('ported', False)
+        ported_status = result.get('ported_status', '')
+        
+        # 根据ported字段确定携号转网状态，而不仅仅依赖ported_status
+        if ported:
+            result_table.add_row(t('ported_status'), f"[green]{ported_status or t('ported')}[/green]")
+            
+            # 获取前一个运营商
+            previous_carrier = result.get('previous_carrier')
+            if previous_carrier:
+                result_table.add_row(t('previous_carrier'), f"[blue]{previous_carrier}[/blue]")
         else:
-            result_table.add_row(t('ported_status'), t('not_ported'))
+            result_table.add_row(t('ported_status'), f"[yellow]{ported_status or t('not_ported')}[/yellow]")
             
         ported_date = result.get('ported_date')
         if ported_date:

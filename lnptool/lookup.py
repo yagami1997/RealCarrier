@@ -17,6 +17,7 @@ from lnptool.telnyx_api import TelnyxAPI, LookupResult, CarrierInfo, Portability
 from lnptool.cache import Cache
 from lnptool.config import get_api_key, is_configured
 from lnptool.i18n import t
+from lnptool.phone_utils import format_phone_number
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -47,7 +48,32 @@ class LookupService:
             LookupResult: 查询结果
         """
         # 格式化电话号码
-        formatted_number = TelnyxAPI._format_phone_number(phone_number)
+        try:
+            formatted_number = f"+1{format_phone_number(phone_number)}"
+        except ValueError as e:
+            # 处理无效的电话号码格式
+            logger.error(f"Invalid phone number format: {e}")
+            error_message = f"无效的电话号码格式: {phone_number}"
+            
+            # 返回错误结果
+            return LookupResult(
+                phone_number=phone_number,
+                carrier="Error",
+                carrier_type="unknown",
+                portable=False,
+                city=None,
+                state=None,
+                rate_center=None,
+                lata=None,
+                line_type="unknown",
+                provider=None,
+                ported_status="未知",
+                ported_date=None,
+                ported=False,
+                previous_carrier=None,
+                status=f"error: 无效的电话号码格式: {phone_number}",
+                raw_data={"error": error_message}
+            )
         
         # 检查是否配置了API密钥
         if not is_configured():
@@ -65,7 +91,7 @@ class LookupService:
                     # 处理缓存数据，确保所有字段类型正确
                     self._sanitize_cached_data(cached_result)
                     # 从缓存创建结果对象
-                    return LookupResult.parse_obj(cached_result)
+                    return LookupResult.from_dict(cached_result)
                 except Exception as e:
                     logger.error(f"Error parsing cached result: {e}")
                     cache_hit = False
@@ -82,13 +108,20 @@ class LookupService:
                 
                 # 缓存结果（如果查询成功）
                 if self.use_cache and self.cache:
-                    self.cache.set(formatted_number, result.dict())
+                    try:
+                        self.cache.set(formatted_number, result.to_dict())
+                    except AttributeError:
+                        # 如果result没有to_dict方法，则跳过缓存
+                        logger.warning(f"Cannot cache result for {formatted_number}: no to_dict method")
+                    except Exception as e:
+                        logger.error(f"Error caching result for {formatted_number}: {e}")
                 
                 return result
             except Exception as e:
                 logger.error(f"Unexpected error during lookup: {e}")
                 # 创建一个安全的错误结果对象
-                return LookupResult(
+                error_message = str(e)
+                result = LookupResult(
                     phone_number=formatted_number,
                     country_code="US",
                     carrier=CarrierInfo(
@@ -104,10 +137,16 @@ class LookupService:
                         ocn=None,
                         previous_carrier=None
                     ),
-                    status=f"error: 查询过程中出现意外错误 - {str(e)}",
+                    status=f"error: {error_message}",
                     lookup_time=time.time(),
                     request_id=None
                 )
+                
+                # 缓存结果（如果查询成功）
+                if self.use_cache and self.cache:
+                    self.cache.set(formatted_number, result.dict())
+                
+                return result
     
     def _sanitize_cached_data(self, data: Dict[str, Any]) -> None:
         """
@@ -226,23 +265,21 @@ class LookupService:
                     # 创建错误结果对象
                     result = LookupResult(
                         phone_number=number,
-                        country_code="Unknown",
-                        carrier=CarrierInfo(
-                            name="Error",
-                            type="unknown",
-                            mobile_country_code=None,
-                            mobile_network_code=None
-                        ),
-                        portability=PortabilityInfo(
-                            portable=False,
-                            ported=False,
-                            spid=None,
-                            ocn=None,
-                            previous_carrier=None
-                        ),
+                        carrier="Error",
+                        carrier_type="unknown",
+                        portable=False,
+                        city=None,
+                        state=None,
+                        rate_center=None,
+                        lata=None,
+                        line_type="unknown",
+                        provider=None,
+                        ported_status="未知",
+                        ported_date=None,
+                        ported=False,
+                        previous_carrier=None,
                         status=f"error: {error_message}",
-                        lookup_time=time.time(),
-                        request_id=None
+                        raw_data={"error": error_message}
                     )
                 
                 results.append(result)
@@ -394,39 +431,51 @@ class LookupService:
             # 转换为字典，仅保留需要的字段
             row = {
                 "phone_number": result.phone_number,
-                "carrier": result.carrier.name if result.carrier else "Unknown",
-                "type": result.carrier.type if result.carrier else "Unknown",
-                "line_type": "voip" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "voip" else 
-                             "landline" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "landline" else
-                             "mobile" if result.carrier and hasattr(result.carrier, 'type') and result.carrier.type.lower() == "mobile" else "unknown",
-                "status": result.status,
-                "city": result.city if result.city else "",
-                "state": result.state if result.state else "",
-                "ported_status": result.ported_status if result.ported_status else t("not_ported"),
-                "ported_date": result.ported_date if result.ported_date else ""
+                "carrier": result.carrier if isinstance(result.carrier, str) else 
+                           (result.carrier.name if hasattr(result.carrier, 'name') else "Unknown"),
+                "type": result.carrier_type if hasattr(result, 'carrier_type') else 
+                        (result.carrier.type if hasattr(result.carrier, 'type') else "Unknown"),
+                "line_type": result.line_type if hasattr(result, 'line_type') else "unknown",
+                "city": result.city if hasattr(result, 'city') and result.city else "",
+                "state": result.state if hasattr(result, 'state') and result.state else "",
+                "ported_status": result.ported_status if hasattr(result, 'ported_status') and result.ported_status else t("not_ported"),
+                "ported_date": result.ported_date if hasattr(result, 'ported_date') and result.ported_date else "",
+                "ported": "Yes" if hasattr(result, 'ported') and result.ported else "No",
+                "previous_carrier": result.previous_carrier if hasattr(result, 'previous_carrier') and result.previous_carrier else ""
             }
             
             # 检查是否为虚拟号码提供商
             is_virtual = False
             if row["line_type"] == "voip":
                 is_virtual = True
-            elif row["carrier"] and any(provider in row["carrier"].lower() for provider in virtual_providers):
+            elif row["carrier"] and any(provider in str(row["carrier"]).lower() for provider in virtual_providers):
                 is_virtual = True
                 row["line_type"] = "voip"  # 将线路类型更新为voip
             
             # 添加虚拟号码标识
             row["is_virtual"] = "Yes" if is_virtual else "No"
             
-            # 如果有携号转网信息，添加到行
-            if result.portability:
+            # 如果有portability属性，兼容旧版本代码
+            if hasattr(result, 'portability') and result.portability:
                 row["portable"] = "Yes" if result.portability.portable else "No"
-                row["ported"] = "Yes" if result.portability.ported else "No"
-                if result.portability.previous_carrier:
-                    row["previous_carrier"] = result.portability.previous_carrier.name
+                # 如果ported字段未定义，使用portability中的值
+                if not hasattr(result, 'ported'):
+                    row["ported"] = "Yes" if result.portability.ported else "No"
+                # 如果previous_carrier字段未定义，使用portability中的值
+                if not hasattr(result, 'previous_carrier') or not result.previous_carrier:
+                    if result.portability.previous_carrier:
+                        row["previous_carrier"] = result.portability.previous_carrier.name
+            else:
+                row["portable"] = "Yes" if hasattr(result, 'portable') and result.portable else "No"
             
             # 添加查询状态
-            row["query_status"] = "Success" if not result.status.startswith("error:") else "Failed"
-            row["error"] = result.status if result.status.startswith("error:") else ""
+            if hasattr(result, 'status'):
+                row["query_status"] = "Success" if not result.status.startswith("error:") else "Failed"
+                row["error"] = result.status if result.status.startswith("error:") else ""
+            else:
+                # 通过raw_data判断是否有错误
+                row["query_status"] = "Failed" if hasattr(result, 'raw_data') and result.raw_data and "error" in result.raw_data else "Success"
+                row["error"] = result.raw_data.get("error", "") if hasattr(result, 'raw_data') and result.raw_data else ""
             
             data.append(row)
         
@@ -553,23 +602,39 @@ def display_batch_summary(results: List[LookupResult]) -> None:
     """
     # 计算统计信息
     total = len(results)
-    successful = sum(1 for r in results if r.status == "success")
+    successful = sum(1 for r in results if hasattr(r, 'status') and r.status == "success")
     failed = total - successful
     
     # 计算携号转网比例
-    ported = sum(1 for r in results if r.status == "success" and r.portability and r.portability.ported)
+    ported = 0
+    for r in results:
+        if hasattr(r, 'status') and r.status == "success":
+            # 优先使用新属性
+            if hasattr(r, 'ported'):
+                if r.ported:
+                    ported += 1
+            # 兼容旧代码
+            elif hasattr(r, 'portability') and r.portability and r.portability.ported:
+                ported += 1
     
     # 统计不同运营商数量
     carrier_count = {}
     for result in results:
-        if result.status == "success":
-            carrier_name = result.carrier.name
+        if hasattr(result, 'status') and result.status == "success":
+            # 获取运营商名称，兼容新旧格式
+            if isinstance(result.carrier, str):
+                carrier_name = result.carrier
+            elif hasattr(result.carrier, 'name'):
+                carrier_name = result.carrier.name
+            else:
+                carrier_name = "Unknown"
+                
             carrier_count[carrier_name] = carrier_count.get(carrier_name, 0) + 1
     
     # 统计错误类型
     error_types = {}
     for result in results:
-        if result.status.startswith("error:"):
+        if hasattr(result, 'status') and result.status.startswith("error:"):
             error_msg = result.status[6:].strip()
             
             # 分类错误类型
