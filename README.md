@@ -210,10 +210,9 @@ python main.py
 ### Single Number Query
 
 <div align="center">
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/669736e2-a76f-4849-b442-d61d4adf9d44" />
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/595f5f41-8c91-45e6-8339-315e727eb4f8" />
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/96304081-33ac-4202-a224-bed98f1279f1" />
-
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/e00a0108-d180-45dc-8c69-02aff9be705d" />
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/a53c84a9-acb9-4c2e-a445-ed6048ee4e03" />
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/9bd0b913-c0ae-4917-9a19-2b6b95a788ec" />
 </div>
 
 1. Select "2. 🔍 Query Single Phone" from the main menu
@@ -227,9 +226,9 @@ python main.py
 </div>
 
 <div align="center">
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/4ec4470b-f4c7-46c7-b2a7-5d12ea007ba1" />
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/f74d198f-1879-491c-b22e-c221e935c6ec" />
-
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/df1c71ab-e985-4cd6-8e76-199432f31073" />
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/04bd91f7-03db-4f97-b711-dc5c06131bde" />
+<img width="950" alt="image" src="https://github.com/user-attachments/assets/2690e2c8-77f2-4e86-930f-cf52cef0bfd0" />
 </div>
 
 1. Select "3. 📊 Batch Query CSV File" from the main menu
