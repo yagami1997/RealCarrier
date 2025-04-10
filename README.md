@@ -167,7 +167,7 @@ python main.py
 <div align="center">
 <img width="900" alt="image" src="https://github.com/user-attachments/assets/669736e2-a76f-4849-b442-d61d4adf9d44" />
 <img width="900" alt="image" src="https://github.com/user-attachments/assets/595f5f41-8c91-45e6-8339-315e727eb4f8" />
-<img width="900" alt="image" src="https://github.com/user-attachments/assets/d408d51f-a968-480c-9b40-27cca81faa92" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/96304081-33ac-4202-a224-bed98f1279f1" />
 
 </div>
 
@@ -195,7 +195,8 @@ python main.py
 ### Cache Management
 
 <div align="center">
-  <img width="900" alt="Cache Management" src="https://github.com/user-attachments/assets/cf3a213c-370d-45e3-8a89-7cb775409b61" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/20924bcd-0e3f-4f24-8571-88eb7e571001" />
+
 </div>
 
 1. Select "4. 💾 Cache Management" from the main menu
