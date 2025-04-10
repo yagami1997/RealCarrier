@@ -147,7 +147,8 @@ python main.py
 ```
 
 <div align="center">
-  <img width="900" alt="Main Interface" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
+  <img width="900" alt="image" src="https://github.com/user-attachments/assets/69c705d0-b190-4605-9bfa-b396574970f2" />
+
 </div>
 
 ### API Key Configuration
