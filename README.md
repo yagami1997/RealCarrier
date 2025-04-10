@@ -68,6 +68,48 @@ RealCarrier supports two leading telecommunications API providers:
 
 - **Telnyx**: A global communications platform that provides direct access to the NPAC database, offering the most accurate number portability information
 - **Twilio**: A world-leading communications API provider whose Lookup API offers phone number verification and carrier information query services
+  
+**Special Notice:** After a month-long back-and-forth and struggle with Telnyx customer support, they have finally unlocked my account. I can now successfully call the API to complete the verification process for my program. Please note: the IP address used during Telnyx registration and the payment method (credit card/PayPal) **must originate from the same country**. For example, if you register with a Singapore IP and pay with a US PayPal account, your registration will be rejected. However, if you register with a US IP and use a US PayPal account, it will not be rejected.
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/f6a9bbb4-323c-4c3b-8ac8-3f7d3ec4dfe6" />
+{
+  "country_code": "US",
+  "national_format": "(406) XXX-XXX",
+  "phone_number": "+1406XXXXXXX",
+  "fraud": null,
+  "carrier": {
+    "mobile_country_code": "",
+    "mobile_network_code": "",
+    "name": "T-MOBILE USA, INC.",
+    "type": "mobile",
+    "error_code": null,
+    "normalized_carrier": "T-Mobile USA"
+  },
+  "caller_name": {
+    "caller_name": "WIRELESS CALLER",
+    "error_code": null
+  },
+  "nnid_override": null,
+  "portability": {
+    "lrn": null,
+    "ported_status": "",
+    "ported_date": "",
+    "ocn": "6034",
+    "line_type": "mobile",
+    "spid": "",
+    "spid_carrier_name": "SPRINT SPECTRUM L.P.- MT",
+    "spid_carrier_type": "",
+    "altspid": "",
+    "altspid_carrier_name": "",
+    "altspid_carrier_type": "",
+    "city": "MISSOULA",
+    "state": "Montana"
+  },
+  "valid_number": true,
+  "record_type": "number_lookup"
+}
+
+
+
 
 ## 🚀 Key Features
 
