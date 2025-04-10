@@ -147,7 +147,7 @@ python main.py
 ```
 
 <div align="center">
-  <img width="900" alt="主界面" src="https://github.com/user-attachments/assets/2a49eaa5-e27d-4970-8edf-a98d69fd7f29" />
+ <img width="900" alt="image" src="https://github.com/user-attachments/assets/69c705d0-b190-4605-9bfa-b396574970f2" />
 </div>
 
 ### API密钥配置
@@ -164,9 +164,9 @@ python main.py
 ### 单号查询
 
 <div align="center">
-  <img width="900" alt="单号查询" src="https://github.com/user-attachments/assets/2833c9a1-e58e-494b-b45d-1e76e18a1f73" />
-  <img width="900" alt="单号查询结果" src="https://github.com/user-attachments/assets/c11cbb48-09fe-4457-9c5c-6213abe3d7d9" />
-  <img width="900" alt="单号查询结果" src="https://github.com/user-attachments/assets/87dd2bbd-cdaa-4864-9a6b-688fe54cb350" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/669736e2-a76f-4849-b442-d61d4adf9d44" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/595f5f41-8c91-45e6-8339-315e727eb4f8" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/d408d51f-a968-480c-9b40-27cca81faa92" />
 </div>
 
 1. 从主菜单选择 "2. 🔍 查询单个电话"
@@ -176,11 +176,12 @@ python main.py
 ### 批量查询
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/c4abf38f-a841-4c85-8a19-c976303ccdbc" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/73601c3e-465c-44b1-99a8-538a55b0085f" />
 </div>
 
 <div align="center">
-  <img width="900" alt="image" src="https://github.com/user-attachments/assets/dc217174-e992-4819-959b-0c0a3bf98ba9" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/4ec4470b-f4c7-46c7-b2a7-5d12ea007ba1" />
+<img width="900" alt="image" src="https://github.com/user-attachments/assets/f74d198f-1879-491c-b22e-c221e935c6ec" />
 </div>
 
 1. 从主菜单选择 "3. 📊 批量查询CSV文件"
