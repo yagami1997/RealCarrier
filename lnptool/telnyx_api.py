@@ -390,17 +390,28 @@ class TelnyxAPI(LookupProvider):
         # 提取携号转网信息
         portability_info = data.get("portability", {})
         
-        # 优先使用spid_carrier_name作为运营商名称，如果存在的话
-        spid_carrier_name = portability_info.get("spid_carrier_name")
-        if spid_carrier_name:
-            carrier_name = spid_carrier_name
+        # 当前运营商是carrier中的name
+        current_carrier = carrier_name
+        
+        # 原运营商是portability中的spid_carrier_name
+        previous_carrier = portability_info.get("spid_carrier_name")
+        
+        # 判断携号转网状态
+        is_ported = False
+        ported_status = ""
+        
+        # 如果有spid_carrier_name且与当前运营商不同，说明已经携号转网
+        if previous_carrier and current_carrier and previous_carrier != current_carrier:
+            is_ported = True
+            ported_status = "已转网"
+        else:
+            ported_status = "未转网"
         
         # 提取城市和州信息，优先使用portability中的信息
         city = portability_info.get("city") or carrier_info.get("city")
         state = portability_info.get("state") or carrier_info.get("state")
         
-        # 提取携号转网状态和日期
-        ported_status = portability_info.get("ported_status")
+        # 提取携号转网日期
         ported_date = portability_info.get("ported_date")
         
         # 根据运营商类型确定线路类型
@@ -410,10 +421,20 @@ class TelnyxAPI(LookupProvider):
         if (line_type is None or line_type == "unknown") and self._is_virtual_number_provider(carrier_name):
             line_type = "voip"
         
+        # 创建原运营商信息对象(如果存在)
+        previous_carrier_obj = None
+        if previous_carrier:
+            previous_carrier_obj = CarrierInfo(
+                name=previous_carrier,
+                type=portability_info.get("spid_carrier_type") or "unknown",
+                mobile_country_code=None,
+                mobile_network_code=None
+            )
+        
         # 创建标准查询结果
         result = LookupResult(
             phone_number=phone_number,
-            carrier=carrier_name,
+            carrier=current_carrier,
             carrier_type=carrier_type,
             portable=portability_info.get("portable"),
             city=city,
@@ -424,6 +445,8 @@ class TelnyxAPI(LookupProvider):
             provider=self.get_provider_name(),
             ported_status=ported_status,
             ported_date=ported_date,
+            ported=is_ported,
+            previous_carrier=previous_carrier,
             raw_data=response_data
         )
         
