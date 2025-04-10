@@ -36,7 +36,13 @@ class LookupResult:
                  ported: bool = False,
                  previous_carrier: Optional[str] = None,
                  status: Optional[str] = "success",
-                 raw_data: Optional[Dict[str, Any]] = None):
+                 raw_data: Optional[Dict[str, Any]] = None,
+                 normalized_carrier: Optional[str] = None,
+                 valid_number: bool = True,
+                 caller_name: Optional[str] = None,
+                 lrn: Optional[str] = None,
+                 fraud_info: Optional[Dict[str, Any]] = None,
+                 record_type: Optional[str] = None):
         """
         初始化查询结果
         
@@ -57,6 +63,12 @@ class LookupResult:
             previous_carrier: 前一个运营商
             status: 查询状态，默认为"success"
             raw_data: 原始响应数据
+            normalized_carrier: 标准化的运营商名称
+            valid_number: 是否是有效的电话号码
+            caller_name: 来电者姓名
+            lrn: 本地路由号码
+            fraud_info: 欺诈风险信息
+            record_type: 记录类型
         """
         self.phone_number = phone_number
         self.carrier = carrier
@@ -75,6 +87,14 @@ class LookupResult:
         self.status = status
         self.raw_data = raw_data or {}
         self.timestamp = time.time()  # 添加时间戳，用于缓存过期判断
+        
+        # 新增字段
+        self.normalized_carrier = normalized_carrier
+        self.valid_number = valid_number
+        self.caller_name = caller_name
+        self.lrn = lrn
+        self.fraud_info = fraud_info or {}
+        self.record_type = record_type
     
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
@@ -94,7 +114,13 @@ class LookupResult:
             "ported": self.ported,
             "previous_carrier": self.previous_carrier,
             "status": self.status,
-            "timestamp": self.timestamp
+            "timestamp": self.timestamp,
+            "normalized_carrier": self.normalized_carrier,
+            "valid_number": self.valid_number,
+            "caller_name": self.caller_name,
+            "lrn": self.lrn,
+            "fraud_info": self.fraud_info,
+            "record_type": self.record_type
         }
     
     @classmethod
@@ -116,7 +142,13 @@ class LookupResult:
             ported=data.get("ported", False),
             previous_carrier=data.get("previous_carrier"),
             status=data.get("status"),
-            raw_data=data.get("raw_data", {})
+            raw_data=data.get("raw_data", {}),
+            normalized_carrier=data.get("normalized_carrier"),
+            valid_number=data.get("valid_number", True),
+            caller_name=data.get("caller_name"),
+            lrn=data.get("lrn"),
+            fraud_info=data.get("fraud_info", {}),
+            record_type=data.get("record_type")
         )
         if "timestamp" in data:
             result.timestamp = data["timestamp"]

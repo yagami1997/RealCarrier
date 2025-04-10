@@ -387,11 +387,32 @@ class TelnyxAPI(LookupProvider):
         carrier_name = carrier_info.get("name")
         carrier_type = carrier_info.get("type")
         
+        # 获取标准化的运营商名称
+        normalized_carrier = carrier_info.get("normalized_carrier")
+        
+        # 提取来电者姓名信息
+        caller_info = data.get("caller_name", {})
+        caller_name = None
+        if caller_info and "caller_name" in caller_info and not caller_info.get("error_code"):
+            caller_name = caller_info.get("caller_name")
+            
+        # 提取号码有效性信息
+        valid_number = data.get("valid_number", True)
+        
+        # 提取记录类型
+        record_type = data.get("record_type")
+        
+        # 提取欺诈风险信息
+        fraud_info = data.get("fraud", {})
+        
         # 提取携号转网信息
         portability_info = data.get("portability", {})
         
-        # 当前运营商是carrier中的name
-        current_carrier = carrier_name
+        # 提取本地路由号码(LRN)
+        lrn = portability_info.get("lrn")
+        
+        # 当前运营商是carrier中的name，如果有normalized_carrier则优先使用
+        current_carrier = normalized_carrier if normalized_carrier else carrier_name
         
         # 原运营商是portability中的spid_carrier_name
         previous_carrier = portability_info.get("spid_carrier_name")
@@ -400,8 +421,12 @@ class TelnyxAPI(LookupProvider):
         is_ported = False
         ported_status = ""
         
-        # 如果有spid_carrier_name且与当前运营商不同，说明已经携号转网
-        if previous_carrier and current_carrier and previous_carrier != current_carrier:
+        # 直接使用API提供的ported_status（如果有）
+        if portability_info.get("ported_status"):
+            ported_status = portability_info.get("ported_status")
+            is_ported = ported_status.lower() == "y"
+        # 如果没有ported_status但有spid_carrier_name且与当前运营商不同，说明已经携号转网
+        elif previous_carrier and current_carrier and previous_carrier != current_carrier:
             is_ported = True
             ported_status = "已转网"
         else:
@@ -414,8 +439,10 @@ class TelnyxAPI(LookupProvider):
         # 提取携号转网日期
         ported_date = portability_info.get("ported_date")
         
-        # 根据运营商类型确定线路类型
-        line_type = self._map_line_type(carrier_type)
+        # 优先使用API直接提供的line_type，如果没有再进行映射
+        line_type = portability_info.get("line_type")
+        if not line_type:
+            line_type = self._map_line_type(carrier_type)
         
         # 如果线路类型未知或为空，并且运营商名称表明这是虚拟号码提供商，则设置为voip
         if (line_type is None or line_type == "unknown") and self._is_virtual_number_provider(carrier_name):
@@ -447,7 +474,13 @@ class TelnyxAPI(LookupProvider):
             ported_date=ported_date,
             ported=is_ported,
             previous_carrier=previous_carrier,
-            raw_data=response_data
+            raw_data=response_data,
+            normalized_carrier=normalized_carrier,
+            valid_number=valid_number,
+            caller_name=caller_name,
+            lrn=lrn,
+            fraud_info=fraud_info,
+            record_type=record_type
         )
         
         return result

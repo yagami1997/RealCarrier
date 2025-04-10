@@ -160,12 +160,29 @@ class UI:
                 display_phone = format_phone_number(phone_digits)
                 phone_number = display_phone
         
+        # 添加号码有效性指示
+        valid_number = result.get('valid_number', True)
+        phone_display = f"[bold]{phone_number}[/bold]"
+        if not valid_number:
+            phone_display += " [red](无效号码)[/red]"
+            
         # 添加基本信息
-        result_table.add_row(t('phone_number'), f"[bold]{phone_number}[/bold]")
+        result_table.add_row(t('phone_number'), phone_display)
         
-        # 获取当前运营商名称
+        # 显示来电者姓名信息（如果有）
+        caller_name = result.get('caller_name')
+        if caller_name:
+            result_table.add_row(t('caller_name'), f"[green]{caller_name}[/green]")
+            
+        # 获取当前运营商名称（优先使用标准化名称）
+        normalized_carrier = result.get('normalized_carrier')
         carrier_name = result.get('carrier', t('unknown'))
         
+        if normalized_carrier:
+            carrier_display = f"{carrier_name} [dim]({normalized_carrier})[/dim]"
+        else:
+            carrier_display = carrier_name
+            
         # 检查运营商是否为虚拟号码提供商
         carrier_type = result.get('carrier_type', '').lower() if result.get('carrier_type') else ''
         line_type = result.get('line_type', 'unknown')
@@ -213,9 +230,9 @@ class UI:
             
         # 显示当前运营商名称，如果是虚拟号码提供商则添加指示
         if is_virtual:
-            result_table.add_row(t('carrier'), f"[yellow]{carrier_name}[/yellow] [magenta]({t('virtual_number_provider')})[/magenta]")
+            result_table.add_row(t('carrier'), f"[yellow]{carrier_display}[/yellow] [magenta]({t('virtual_number_provider')})[/magenta]")
         else:
-            result_table.add_row(t('carrier'), f"[yellow]{carrier_name}[/yellow]")
+            result_table.add_row(t('carrier'), f"[yellow]{carrier_display}[/yellow]")
         
         # 添加线路类型（使用不同颜色）
         if is_virtual or line_type == 'voip':
@@ -239,6 +256,11 @@ class UI:
                 location.append(state)
             result_table.add_row(t('location'), ", ".join(location))
         
+        # 添加本地路由号码(LRN)信息（如果有）
+        lrn = result.get('lrn')
+        if lrn:
+            result_table.add_row(t('lrn'), f"[blue]{lrn}[/blue]")
+            
         # 添加携号转网状态和日期
         ported = result.get('ported', False)
         ported_status = result.get('ported_status', '')
@@ -261,6 +283,19 @@ class UI:
         # 添加其他信息
         if result.get('portable') is not None:
             result_table.add_row(t('portable'), f"[green]{t('yes')}[/green]" if result['portable'] else f"[red]{t('no')}[/red]")
+        
+        # 添加欺诈风险信息（如果有）
+        fraud_info = result.get('fraud_info', {})
+        if fraud_info and any(fraud_info.values()):
+            fraud_level = fraud_info.get('level', 'unknown')
+            if fraud_level.lower() == 'high':
+                risk_display = f"[bold red]{fraud_level}[/bold red]"
+            elif fraud_level.lower() == 'medium':
+                risk_display = f"[bold yellow]{fraud_level}[/bold yellow]"
+            else:
+                risk_display = f"[bold green]{fraud_level}[/bold green]"
+            
+            result_table.add_row(t('fraud_risk'), risk_display)
         
         # 添加查询提供商信息
         result_table.add_row(t('query_provider'), f"[blue]{result.get('provider', t('unknown'))}[/blue]")

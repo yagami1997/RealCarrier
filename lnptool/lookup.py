@@ -72,7 +72,13 @@ class LookupService:
                 ported=False,
                 previous_carrier=None,
                 status=f"error: 无效的电话号码格式: {phone_number}",
-                raw_data={"error": error_message}
+                raw_data={"error": error_message},
+                normalized_carrier=None,
+                valid_number=False,
+                caller_name=None,
+                lrn=None,
+                fraud_info=None,
+                record_type=None
             )
         
         # 检查是否配置了API密钥
@@ -139,7 +145,13 @@ class LookupService:
                     ),
                     status=f"error: {error_message}",
                     lookup_time=time.time(),
-                    request_id=None
+                    request_id=None,
+                    normalized_carrier=None,
+                    valid_number=False,
+                    caller_name=None,
+                    lrn=None,
+                    fraud_info=None,
+                    record_type=None
                 )
                 
                 # 缓存结果（如果查询成功）
@@ -279,7 +291,13 @@ class LookupService:
                         ported=False,
                         previous_carrier=None,
                         status=f"error: {error_message}",
-                        raw_data={"error": error_message}
+                        raw_data={"error": error_message},
+                        normalized_carrier=None,
+                        valid_number=False,
+                        caller_name=None,
+                        lrn=None,
+                        fraud_info=None,
+                        record_type=None
                     )
                 
                 results.append(result)
@@ -433,6 +451,7 @@ class LookupService:
                 "phone_number": result.phone_number,
                 "carrier": result.carrier if isinstance(result.carrier, str) else 
                            (result.carrier.name if hasattr(result.carrier, 'name') else "Unknown"),
+                "normalized_carrier": result.normalized_carrier if hasattr(result, 'normalized_carrier') else "",
                 "type": result.carrier_type if hasattr(result, 'carrier_type') else 
                         (result.carrier.type if hasattr(result.carrier, 'type') else "Unknown"),
                 "line_type": result.line_type if hasattr(result, 'line_type') else "unknown",
@@ -441,7 +460,10 @@ class LookupService:
                 "ported_status": result.ported_status if hasattr(result, 'ported_status') and result.ported_status else t("not_ported"),
                 "ported_date": result.ported_date if hasattr(result, 'ported_date') and result.ported_date else "",
                 "ported": "Yes" if hasattr(result, 'ported') and result.ported else "No",
-                "previous_carrier": result.previous_carrier if hasattr(result, 'previous_carrier') and result.previous_carrier else ""
+                "previous_carrier": result.previous_carrier if hasattr(result, 'previous_carrier') and result.previous_carrier else "",
+                "caller_name": result.caller_name if hasattr(result, 'caller_name') and result.caller_name else "",
+                "lrn": result.lrn if hasattr(result, 'lrn') and result.lrn else "",
+                "valid_number": "Yes" if hasattr(result, 'valid_number') and result.valid_number else "No"
             }
             
             # 检查是否为虚拟号码提供商
@@ -484,9 +506,9 @@ class LookupService:
         
         # 确保列顺序一致
         columns = [
-            "phone_number", "carrier", "type", "line_type", "is_virtual",
-            "city", "state", "portable", "ported", "ported_status", "ported_date", "previous_carrier", 
-            "query_status", "error"
+            "phone_number", "carrier", "normalized_carrier", "type", "line_type", "is_virtual",
+            "caller_name", "valid_number", "city", "state", "lrn", "portable", "ported", 
+            "ported_status", "ported_date", "previous_carrier", "query_status", "error"
         ]
         # 只保留存在的列
         columns = [col for col in columns if col in df.columns]
