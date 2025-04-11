@@ -245,7 +245,8 @@ To identify virtual numbers (numbers provided by VoIP services):
    - Ensure your Telnyx account remains funded
    - Complete all verification steps to maintain API access
 
-By following this guide, you'll be able to effectively integrate and utilize the Telnyx Number Lookup API within the RealCarrier project, providing accurate carrier and portability information for US phone numbers.
+### By following this guide, you'll be able to effectively integrate and utilize the Telnyx Number Lookup API within the RealCarrier project, providing accurate carrier and portability information for US phone numbers.
+
 ---
 ## 🚀 Key Features
 
