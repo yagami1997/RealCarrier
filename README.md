@@ -112,8 +112,141 @@ RealCarrier supports two leading telecommunications API providers:
 }
 
 ```
+## 📱 Telnyx Number Lookup API Developer Guide
 
+This guide provides essential information for developers looking to integrate the Telnyx Number Lookup API into the RealCarrier project. The Number Lookup API retrieves comprehensive information about US phone numbers, including carrier details, portability status, and geographic location.
 
+### 🔑 Prerequisites & Account Setup
+
+1. **Create a Telnyx Account**
+   - Sign up at [Telnyx.com](https://telnyx.com/sign-up)
+   - Complete the Know Your Customer (KYC) verification process
+   - Fund your account with the minimum required deposit
+
+2. **API Key Access**
+   - Navigate to the API Keys section in your Telnyx Portal
+   - Generate a new API key for your application
+   - Store this key securely as it will be needed for all API requests
+
+3. **IP Compatibility Note**
+   - Ensure that the IP address used during registration matches the country of your payment method
+   - For example, a US-based PayPal account should be used with a US IP address during registration
+
+### 📋 Understanding the Number Lookup API
+
+The Number Lookup API provides detailed information about phone numbers in the United States, with particular emphasis on:
+
+1. **Carrier Information**
+   - Current carrier details
+   - Line type (mobile, landline, VoIP)
+   - Mobile country and network codes (when applicable)
+
+2. **Portability Data**
+   - Local Number Portability (LNP) status
+   - Original carrier information via SPID
+   - Port date (when a number has been transferred)
+   - OCN (Operating Company Number)
+
+3. **Geographic Details**
+   - City and state information
+   - Rate center data
+
+4. **Optional Features**
+   - Caller name information
+   - Fraud risk assessment
+   - Additional carrier details
+
+### 📊 API Response Structure
+
+The API returns a JSON response with the following key sections:
+
+1. **Basic Number Information**
+   - `country_code`: The country code (e.g., "US")
+   - `national_format`: Formatted display of the number
+   - `phone_number`: The full E.164 format number
+   - `valid_number`: Boolean indicating number validity
+
+2. **Carrier Section**
+   - `name`: The carrier's official name
+   - `normalized_carrier`: A standardized version of the carrier name
+   - `type`: The line type (mobile, landline, voip)
+
+3. **Portability Section**
+   - `ported_status`: Indicates if the number has been ported
+   - `ported_date`: Date of the most recent port
+   - `spid_carrier_name`: The original carrier name (most accurate)
+   - `city` and `state`: Geographic location
+
+4. **Additional Information**
+   - `caller_name`: Information about the registered name (if available)
+   - `fraud`: Risk assessment data (if requested)
+
+### 💡 Integration Best Practices
+
+1. **Error Handling**
+   - Implement robust error handling for API rate limits
+   - Account for potential network connectivity issues
+   - Handle invalid phone number formats gracefully
+
+2. **Caching Strategy**
+   - Implement a local cache to store lookup results
+   - Set appropriate expiration times for cached data
+   - Consider database storage for frequently queried numbers
+
+3. **Rate Limit Management**
+   - Track your API usage to avoid exceeding limits
+   - Implement exponential backoff for retry attempts
+   - Consider batch processing for multiple numbers
+
+4. **Data Interpretation**
+   - Focus on the `spid_carrier_name` for the most accurate carrier information
+   - Use `portability` data to determine if a number has been transferred
+   - Leverage geographic information for regional analysis
+
+### 📊 Virtual Number Detection
+
+To identify virtual numbers (numbers provided by VoIP services):
+
+1. Look for the following indicators in the API response:
+   - `carrier.type` value of "voip"
+   - Specific carrier names associated with virtual providers
+
+2. Reference the virtual carrier database included in RealCarrier:
+   - The system maintains a list of 38+ common virtual number providers
+   - Check carrier names against this database for accurate identification
+
+### 📝 Configuration in RealCarrier
+
+1. **API Provider Selection**
+   - In the RealCarrier main menu, select "API Key Management"
+   - Choose "Telnyx" as your provider
+   - Enter your API key when prompted
+
+2. **Testing Your Integration**
+   - Use the single number query feature to test your API key
+   - Verify that all expected data fields are being returned
+   - Confirm proper handling of different number types
+
+3. **Adjusting Cache Settings**
+   - Configure cache expiration times based on your needs
+   - Balance between reducing API calls and maintaining data freshness
+
+### ⚠️ Important Considerations
+
+1. **API Costs**
+   - Be aware that each lookup incurs a cost based on Telnyx's pricing
+   - Monitor your usage to control expenses
+
+2. **Data Accuracy**
+   - Number portability information is typically updated within 24 hours
+   - Some virtual numbers may not be identified with 100% accuracy
+
+3. **Account Requirements**
+   - Ensure your Telnyx account remains funded
+   - Complete all verification steps to maintain API access
+
+By following this guide, you'll be able to effectively integrate and utilize the Telnyx Number Lookup API within the RealCarrier project, providing accurate carrier and portability information for US phone numbers.
+---
 ## 🚀 Key Features
 
 | Feature | Description |
