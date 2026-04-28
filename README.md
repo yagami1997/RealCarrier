@@ -13,7 +13,7 @@
 </p>
 
 <p>
-  <i>Lightweight and efficient US phone number carrier information query tool (bilingual interface support)</i>
+  <i>Lightweight and efficient US phone number carrier lookup tool with bilingual interface and fast batch query support</i>
 </p>
 
 </div>
